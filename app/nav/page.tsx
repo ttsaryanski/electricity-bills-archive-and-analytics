@@ -11,20 +11,44 @@ import {
     MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-
-const navigation = [
-    { name: "Dashboard", href: "/dashboard", current: false },
-    { name: "Team", href: "#", current: false },
-    { name: "Projects", href: "#", current: false },
-    { name: "Calendar", href: "#", current: false },
-];
+import {
+    BarChart3,
+    Package,
+    Plus,
+    Settings,
+    Bolt,
+    UserLock,
+} from "lucide-react";
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ");
 }
+//import { UserButton } from "@stackframe/stack";
 
 const NavigationBar = () => {
     const currentPath = usePathname();
+
+    const navigation = [
+        {
+            name: "Dashboard",
+            href: "/dashboard",
+            current: false,
+            icon: BarChart3,
+        },
+        {
+            name: "Inventory",
+            href: "/inventory",
+            current: false,
+            icon: Package,
+        },
+        {
+            name: "Add Product",
+            href: "/add-product",
+            current: false,
+            icon: Plus,
+        },
+        { name: "Settings", href: "/settings", current: false, icon: Settings },
+    ];
     navigation.reduce((acc, item) => {
         if (item.href === currentPath) {
             item.current = true;
@@ -37,7 +61,7 @@ const NavigationBar = () => {
             as="nav"
             className="relative bg-gray-800/50 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
         >
-            <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+            <div className="mx-auto px-2 sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between">
                     <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         {/* Mobile menu button*/}
@@ -55,32 +79,36 @@ const NavigationBar = () => {
                         </DisclosureButton>
                     </div>
                     <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                        {/* <div className="flex shrink-0 items-center">
-                            <img
-                                alt="Your Company"
-                                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                                className="h-8 w-auto"
-                            />
-                        </div> */}
+                        <div className="flex shrink-0 items-center space-x-2">
+                            <Link href="/">
+                                <Bolt color="#03071280" className="h-7 w-7" />
+                            </Link>
+                        </div>
                         <div className="hidden sm:ml-6 sm:block">
                             <div className="flex space-x-4">
-                                {navigation.map((item) => (
-                                    <a
-                                        key={item.name}
-                                        href={item.href}
-                                        aria-current={
-                                            item.current ? "page" : undefined
-                                        }
-                                        className={classNames(
-                                            item.current
-                                                ? "bg-gray-950/50 text-white"
-                                                : "text-gray-300 hover:bg-white/5 hover:text-white",
-                                            "rounded-md px-3 py-2 text-sm font-medium",
-                                        )}
-                                    >
-                                        {item.name}
-                                    </a>
-                                ))}
+                                {navigation.map((item) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            aria-current={
+                                                item.current
+                                                    ? "page"
+                                                    : undefined
+                                            }
+                                            className={classNames(
+                                                item.current
+                                                    ? "bg-gray-950/50 text-white"
+                                                    : "text-gray-300 hover:bg-white/5 hover:text-white",
+                                                "flex items-center rounded-md px-1 py-2 text-sm font-normal",
+                                            )}
+                                        >
+                                            <IconComponent className="w-5 h-5" />
+                                            {item.name}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -94,6 +122,11 @@ const NavigationBar = () => {
                             <BellIcon aria-hidden="true" className="size-6" />
                         </button>
 
+                        {/* <div className="relative ml-3">
+                            <div className="flex items-center justify-between text-gray-950/50 hover:text-gray-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                <UserButton />
+                            </div>
+                        </div> */}
                         {/* Profile dropdown */}
                         <Menu as="div" className="relative ml-3">
                             <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
@@ -101,49 +134,13 @@ const NavigationBar = () => {
                                     href="/sign-in"
                                     className="bg-gray-950/50 text-white px-3 py-2 text-sm font-medium rounded-lg font-semibold hover:bg-gray-700/50 transition-colors"
                                 >
-                                    <i
+                                    {/* <i
                                         className="fa-solid fa-right-to-bracket"
                                         aria-hidden="true"
-                                    ></i>
+                                    ></i> */}
+                                    <UserLock className="w-5 h-5" />
                                 </Link>
-                                {/* <span className="absolute -inset-1.5" />
-                                <span className="sr-only">Open user menu</span>
-                                <img
-                                    alt=""
-                                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                    className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
-                                /> */}
                             </MenuButton>
-
-                            {/* <MenuItems
-                                transition
-                                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 outline -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                            >
-                                <MenuItem>
-                                    <a
-                                        href="#"
-                                        className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                                    >
-                                        Your profile
-                                    </a>
-                                </MenuItem>
-                                <MenuItem>
-                                    <a
-                                        href="#"
-                                        className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                                    >
-                                        Settings
-                                    </a>
-                                </MenuItem>
-                                <MenuItem>
-                                    <a
-                                        href="#"
-                                        className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                                    >
-                                        Sign out
-                                    </a>
-                                </MenuItem>
-                            </MenuItems> */}
                         </Menu>
                     </div>
                 </div>

@@ -1,25 +1,6 @@
 import Link from "next/link";
-import { stackServerApp } from "@/stack/server";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 const HomePage = async () => {
-    const user = await stackServerApp.getUser();
-
-    if (user) {
-        await prisma.user.upsert({
-            where: {
-                id: user.id,
-            },
-            update: {},
-            create: {
-                id: user.id,
-                email: user.primaryEmail as string,
-            },
-        });
-        //redirect("/dashboard");
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
             <div className="container mx-auto px-4 py-16">
