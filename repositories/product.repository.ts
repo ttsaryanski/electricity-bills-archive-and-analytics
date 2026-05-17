@@ -32,3 +32,37 @@ export async function getRecentProducts(userId: string) {
         take: 5,
     });
 }
+
+export async function getAllProductsCountWithQuery(where: {
+    userId: string;
+    name?: { contains: string; mode: "insensitive" };
+}) {
+    return prisma.product.count({
+        where,
+    });
+}
+
+export async function getAllProductsWithQuery(
+    where: {
+        userId: string;
+        name?: { contains: string; mode: "insensitive" };
+    },
+    page: number,
+    pageSize: number,
+) {
+    return prisma.product.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+    });
+}
+
+export async function deleteProductById(productId: string, userId: string) {
+    await prisma.product.deleteMany({
+        where: {
+            id: productId,
+            userId,
+        },
+    });
+}
