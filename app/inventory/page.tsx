@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { getProductsPaginated } from "@/services/product.services";
 import Pagination from "@/components/pagination";
 import DeleteButton from "@/components/delete.button";
@@ -7,6 +9,11 @@ const InventoryPage = async ({
 }: {
     searchParams: { query?: string; page?: string };
 }) => {
+    const user = await getCurrentUser();
+    if (!user) {
+        redirect("/sign-in");
+    }
+
     const params = await searchParams;
     const query = (params.query ?? "").trim();
     const page = Math.max(1, Number(params.page ?? 1));

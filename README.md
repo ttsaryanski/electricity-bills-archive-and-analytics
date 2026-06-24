@@ -24,7 +24,7 @@ A modern, full-stack inventory management application built with Next.js, Prisma
 - **Analytics**: Track weekly product trends with interactive charts
 - **Low-Stock Alerts**: Automatic detection and notification of products running low on inventory
 - **Search & Filter**: Paginated product search with case-insensitive filtering
-- **User Authentication**: Secure user management with Stack authentication
+- **User Authentication**: Secure user management with Clerk authentication
 - **Responsive Design**: Mobile-friendly interface built with TailwindCSS
 - **Multi-user Support**: Each user maintains their own isolated inventory
 
@@ -41,7 +41,7 @@ A modern, full-stack inventory management application built with Next.js, Prisma
 
 - **Prisma 7.8.0** - ORM for PostgreSQL
 - **PostgreSQL** - Relational database (via Neon adapter)
-- **Stack** - Authentication and user management
+- **Clerk** - Authentication and user management
 
 ### Development
 
@@ -82,9 +82,9 @@ Create a `.env.local` file in the project root with the following variables:
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/inventory_db
 
-# Authentication (Stack)
-NEXT_PUBLIC_STACK_PROJECT_ID=your_stack_project_id
-STACK_PROJECT_SECRET_KEY=your_stack_secret_key
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 ```
 
 ### Database Setup
@@ -148,7 +148,8 @@ nextjs/
 │   ├── inventory/            # Product inventory page
 │   ├── add-product/          # Product creation page
 │   ├── settings/             # User settings
-│   └── sign-in/              # Authentication page
+│   ├── sign-in/              # Authentication page
+│   └── sign-up/              # Registration page
 ├── components/               # Reusable React components
 │   ├── products.charts.tsx   # Chart components
 │   └── pagination.tsx        # Pagination component
@@ -163,7 +164,7 @@ nextjs/
 ├── prisma/                   # Database schema and migrations
 │   ├── schema.prisma        # Data models
 │   └── migrations/          # Migration history
-├── stack/                    # Stack authentication setup
+├── proxy.ts                  # Route protection with Clerk
 └── public/                   # Static assets
 ```
 

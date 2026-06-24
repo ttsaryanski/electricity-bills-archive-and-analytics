@@ -1,29 +1,28 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import {
     Disclosure,
     DisclosureButton,
     DisclosurePanel,
     Menu,
     MenuButton,
-    MenuItem,
-    MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
     BarChart3,
     Package,
     Plus,
-    Settings,
     Bolt,
     UserLock,
+    LocateFixed,
 } from "lucide-react";
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ");
 }
-//import { UserButton } from "@stackframe/stack";
 
 const NavigationBar = () => {
     const currentPath = usePathname();
@@ -47,7 +46,12 @@ const NavigationBar = () => {
             current: false,
             icon: Plus,
         },
-        { name: "Settings", href: "/settings", current: false, icon: Settings },
+        {
+            name: "Address",
+            href: "/address",
+            current: false,
+            icon: LocateFixed,
+        },
     ];
     navigation.reduce((acc, item) => {
         if (item.href === currentPath) {
@@ -122,26 +126,26 @@ const NavigationBar = () => {
                             <BellIcon aria-hidden="true" className="size-6" />
                         </button>
 
-                        {/* <div className="relative ml-3">
-                            <div className="flex items-center justify-between text-gray-950/50 hover:text-gray-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-                                <UserButton />
+                        <SignedIn>
+                            <div className="relative ml-3">
+                                <div className="flex items-center justify-between text-gray-950/50 hover:text-gray-950/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                    <UserButton />
+                                </div>
                             </div>
-                        </div> */}
+                        </SignedIn>
                         {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                            <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-                                <Link
-                                    href="/sign-in"
-                                    className="bg-gray-950/50 text-white px-3 py-2 text-sm font-medium rounded-lg font-semibold hover:bg-gray-700/50 transition-colors"
-                                >
-                                    {/* <i
-                                        className="fa-solid fa-right-to-bracket"
-                                        aria-hidden="true"
-                                    ></i> */}
-                                    <UserLock className="w-5 h-5" />
-                                </Link>
-                            </MenuButton>
-                        </Menu>
+                        <SignedOut>
+                            <Menu as="div" className="relative ml-3">
+                                <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                    <Link
+                                        href="/sign-in"
+                                        className="bg-gray-950/50 text-white px-3 py-2 text-sm font-medium rounded-lg font-semibold hover:bg-gray-700/50 transition-colors"
+                                    >
+                                        <UserLock className="w-5 h-5" />
+                                    </Link>
+                                </MenuButton>
+                            </Menu>
+                        </SignedOut>
                     </div>
                 </div>
             </div>
