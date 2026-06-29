@@ -1,6 +1,10 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+
+import { toast } from "sonner";
+
 import { setAddressPrimary } from "@/services/address.services";
 
 type SetAddressPrimaryButtonProps = {
@@ -13,14 +17,25 @@ const SetAddressPrimaryButton = ({
     isPrimary,
 }: SetAddressPrimaryButtonProps) => {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
     const handleSetPrimary = () => {
         const confirmed = confirm("Set this address as primary?");
-
         if (!confirmed) return;
 
-        startTransition(async () => {
-            await setAddressPrimary(id);
+        startTransition(() => {
+            void (async () => {
+                try {
+                    await setAddressPrimary(id);
+                    router.refresh();
+                } catch (error) {
+                    toast.error(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to set address as primary",
+                    );
+                }
+            })();
         });
     };
 

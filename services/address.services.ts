@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { createAddressSchema } from "@/validators/address.schema";
 import {
@@ -17,9 +18,12 @@ export async function getAddresses() {
         redirect("/sign-in");
     }
 
-    const addresses = await getAllAddresses(user.id);
-
-    return addresses;
+    try {
+        const addresses = await getAllAddresses(user.id);
+        return addresses;
+    } catch {
+        throw new Error("Failed to fetch addresses");
+    }
 }
 
 export async function deleteAddress(addressId: string) {
@@ -37,11 +41,19 @@ export async function deleteAddress(addressId: string) {
     } catch {
         throw new Error("Failed to delete address");
     }
-
-    redirect("/address");
+    revalidatePath("/address");
 }
 
-export async function createAddress(formData: FormData) {
+type CreateAddressState = {
+    // error: string | null;
+    // key: number;
+    success: boolean;
+    message: string;
+};
+export async function createAddress(
+    _prevState: CreateAddressState,
+    formData: FormData,
+) {
     const user = await getCurrentUser();
     if (!user) {
         redirect("/sign-in");
@@ -52,7 +64,12 @@ export async function createAddress(formData: FormData) {
     });
 
     if (!parsedData.success) {
-        throw new Error("Validation failed");
+        return {
+            // error: parsedData.error.issues[0].message,
+            // key: Date.now(),
+            success: false,
+            message: parsedData.error.issues[0].message,
+        };
     }
 
     try {
@@ -61,7 +78,12 @@ export async function createAddress(formData: FormData) {
             userId: user.id,
         });
     } catch {
-        throw new Error("Failed to create address");
+        return {
+            // error: "Failed to create address",
+            // key: Date.now(),
+            success: false,
+            message: "Failed to create address",
+        };
     }
 
     redirect("/address");
@@ -82,6 +104,5 @@ export async function setAddressPrimary(addressId: string) {
     } catch {
         throw new Error("Failed to set address as primary");
     }
-
-    redirect("/address");
+    revalidatePath("/address");
 }

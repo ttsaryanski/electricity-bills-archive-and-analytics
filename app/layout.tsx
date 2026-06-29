@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
                 <ClerkProvider afterSignOutUrl="/sign-in">
                     <NavigationBar />
                     {children}
+                    <Toaster />
                 </ClerkProvider>
             </body>
         </html>

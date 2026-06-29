@@ -68,8 +68,15 @@ export async function deleteAddressById(addressId: string, userId: string) {
 }
 
 export async function createAddress(data: { address: string; userId: string }) {
+    const count = await prisma.address.count({
+        where: { userId: data.userId },
+    });
+
     await prisma.address.create({
-        data,
+        data: {
+            ...data,
+            isPrimary: count === 0,
+        },
     });
 }
 

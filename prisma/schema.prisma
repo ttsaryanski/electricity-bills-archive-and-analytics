@@ -61,6 +61,8 @@ model Address {
   user   User   @relation(fields: [userId], references: [id])
 
   bills Bill[]
+
+  @@unique([userId, address])
 }
 
 model User {
