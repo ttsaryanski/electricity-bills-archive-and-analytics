@@ -1,50 +1,65 @@
+import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
+
+export type AuthUser = NonNullable<Awaited<ReturnType<typeof currentUser>>>;
+
+function getUserEmail(user: Awaited<ReturnType<typeof currentUser>>) {
+    if (!user) {
+        return null;
+    }
+
+    return (
+        user.primaryEmailAddress?.emailAddress ||
+        user.emailAddresses[0]?.emailAddress ||
+        null
+    );
+}
+
+async function syncAuthenticatedUser(userId: string, email: string) {
+    try {
+        await prisma.user.upsert({
+            where: { id: userId },
+            update: { email },
+            create: { id: userId, email },
+        });
+    } catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            await prisma.user.update({
+                where: { email },
+                data: { id: userId },
+            });
+            return;
+        }
+
+        throw error;
+    }
+}
 
 export async function getCurrentUser() {
     const user = await currentUser();
+    if (!user) {
+        return null;
+    }
 
-    if (user) {
-        const email =
-            user.primaryEmailAddress?.emailAddress ||
-            user.emailAddresses[0]?.emailAddress;
+    const email = getUserEmail(user);
+    if (!email) {
+        return user;
+    }
 
-        if (!email) {
-            return null;
-        }
+    await syncAuthenticatedUser(user.id, email);
+    return user;
+}
 
-        const existingUserById = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { id: true, email: true },
-        });
-
-        if (existingUserById) {
-            if (existingUserById.email !== email) {
-                await prisma.user.update({
-                    where: { id: user.id },
-                    data: { email },
-                });
-            }
-        } else {
-            const existingUserByEmail = await prisma.user.findUnique({
-                where: { email },
-                select: { id: true },
-            });
-
-            if (existingUserByEmail) {
-                await prisma.user.update({
-                    where: { email },
-                    data: { id: user.id },
-                });
-            } else {
-                await prisma.user.create({
-                    data: {
-                        id: user.id,
-                        email,
-                    },
-                });
-            }
-        }
+export async function requireCurrentUser(): Promise<AuthUser> {
+    const user = await getCurrentUser();
+    if (!user) {
+        redirect("/sign-in");
     }
 
     return user;
