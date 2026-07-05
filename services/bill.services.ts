@@ -1,12 +1,20 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { requireCurrentUser } from "@/lib/auth";
 
-import { createBillSchema, yearQuerySchema } from "@/validators/bill.schema";
+import {
+    createBillSchema,
+    yearQuerySchema,
+    editBillSchema,
+} from "@/validators/bill.schema";
 import {
     createBill as createBillRepo,
+    editBill as editBillRepo,
+    deleteBillById as deleteBillRepo,
+    getBillById as getBillByIdRepo,
     getAllBillsCountWithQuery,
     getAllBillsWithQuery,
 } from "@/repositories/bill.repository";
@@ -95,4 +103,70 @@ export async function getBillsPaginated(
         totalCount,
         bills,
     };
+}
+
+export async function deleteBill(billId: string) {
+    const user = await requireCurrentUser();
+
+    if (!billId) {
+        throw new Error("Bill ID is required");
+    }
+
+    try {
+        await deleteBillRepo(billId, user.id);
+    } catch (error) {
+        throw new Error(
+            error instanceof Error ? error.message : "Failed to delete bill",
+        );
+    }
+    revalidatePath("/bills");
+}
+
+export async function getBillById(billId: string) {
+    try {
+        const bill = await getBillByIdRepo(billId);
+        if (!bill) {
+            throw new Error("Bill not found");
+        }
+
+        return { ...bill, total: Number(bill.total) };
+    } catch (error) {
+        throw new Error(
+            error instanceof Error ? error.message : "Failed to fetch bill",
+        );
+    }
+}
+
+type EditBillState = {
+    success: boolean;
+    message: string;
+    path?: string;
+};
+export async function editBill(
+    _prevState: EditBillState,
+    formData: FormData,
+    billId: string,
+) {
+    const parsedData = editBillSchema.safeParse({
+        total: Number(formData.get("total")),
+    });
+    if (!parsedData.success) {
+        return {
+            success: false,
+            message: parsedData.error.issues[0].message,
+            path: parsedData.error.issues[0].path[0] as string,
+        };
+    }
+
+    try {
+        await editBillRepo(billId, parsedData.data.total);
+    } catch (error) {
+        return {
+            success: false,
+            message:
+                error instanceof Error ? error.message : "Failed to edit bill",
+            path: "",
+        };
+    }
+    redirect("/bills");
 }

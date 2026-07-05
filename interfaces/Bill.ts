@@ -9,3 +9,14 @@ export interface Bill {
     userId: string;
     period: Date;
 }
+
+export interface BillWithAddress {
+    month: number;
+    year: number;
+    total: number;
+    period: Date;
+    address: {
+        id: string;
+        address: string;
+    };
+}

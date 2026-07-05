@@ -19,8 +19,12 @@ export async function getAddresses() {
     try {
         const addresses = await getAllAddresses(user.id);
         return addresses;
-    } catch {
-        throw new Error("Failed to fetch addresses");
+    } catch (error) {
+        throw new Error(
+            error instanceof Error
+                ? error.message
+                : "Failed to fetch addresses",
+        );
     }
 }
 
@@ -33,8 +37,10 @@ export async function deleteAddress(addressId: string) {
 
     try {
         await deleteAddressById(addressId, user.id);
-    } catch {
-        throw new Error("Failed to delete address");
+    } catch (error) {
+        throw new Error(
+            error instanceof Error ? error.message : "Failed to delete address",
+        );
     }
     revalidatePath("/address");
 }

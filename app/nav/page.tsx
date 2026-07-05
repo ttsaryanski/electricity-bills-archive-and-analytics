@@ -35,24 +35,24 @@ const NavigationBar = () => {
             current: false,
             icon: BarChart3,
         },
-        {
-            name: "Inventory",
-            href: "/inventory",
-            current: false,
-            icon: Package,
-        },
+        // {
+        //     name: "Inventory",
+        //     href: "/inventory",
+        //     current: false,
+        //     icon: Package,
+        // },
         {
             name: "Bills",
             href: "/bills",
             current: false,
             icon: Euro,
         },
-        {
-            name: "Add Product",
-            href: "/add-product",
-            current: false,
-            icon: Plus,
-        },
+        // {
+        //     name: "Add Product",
+        //     href: "/add-product",
+        //     current: false,
+        //     icon: Plus,
+        // },
         {
             name: "Add Bill",
             href: "/add-bill",

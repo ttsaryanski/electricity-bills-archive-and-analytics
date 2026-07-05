@@ -19,3 +19,11 @@ export const yearQuerySchema = z.object({
         .max(2100, "Year must be between 1900 and 2100"),
 });
 export type YearQueryInput = z.infer<typeof yearQuerySchema>;
+
+export const editBillSchema = z.object({
+    total: z
+        .number()
+        .min(0, "Bill must be a positive number")
+        .max(1000000, "Bill must be less than or equal to 1000000"),
+});
+export type EditBillInput = z.infer<typeof editBillSchema>;

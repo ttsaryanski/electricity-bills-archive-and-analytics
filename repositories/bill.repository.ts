@@ -47,3 +47,50 @@ export async function getAllBillsWithQuery(
         take: pageSize,
     });
 }
+
+export async function deleteBillById(billId: string, userId: string) {
+    await prisma.bill.delete({
+        where: {
+            id: billId,
+            userId,
+        },
+    });
+}
+
+export async function getBillById(billId: string) {
+    return prisma.bill.findUnique({
+        where: {
+            id: billId,
+        },
+        select: {
+            id: true,
+            month: true,
+            year: true,
+            period: true,
+            total: true,
+            address: {
+                select: {
+                    address: true,
+                },
+            },
+        },
+    });
+}
+
+export async function editBill(billId: string, total: number) {
+    const existingBill = await prisma.bill.findFirst({
+        where: { id: billId },
+    });
+    if (!existingBill) {
+        throw new Error("Bill not found");
+    }
+
+    await prisma.bill.update({
+        where: {
+            id: billId,
+        },
+        data: {
+            total: total,
+        },
+    });
+}

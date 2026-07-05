@@ -1,8 +1,10 @@
 import { getBillsPaginated } from "@/services/bill.services";
 
 import Pagination from "@/components/pagination";
-import DeleteButton from "@/components/delete.button";
+import DeleteBillButton from "@/components/bill/delete.bill.button";
+import EditBillButton from "@/components/bill/edit.bill.button";
 import SearchBillForm from "@/components/bill/search.bill";
+import PrimaryAddress from "@/components/address/primary.address";
 
 import { Bill } from "@/interfaces/Bill";
 
@@ -46,7 +48,7 @@ const BillsPage = async ({
     }));
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="bills min-h-screen bg-gray-50">
             <main className="p-8">
                 <div className="mb-8">
                     <div className="flex items-center justify-between">
@@ -58,12 +60,13 @@ const BillsPage = async ({
                                 Manage your bills and track payment statuses.
                             </p>
                         </div>
+                        <PrimaryAddress />
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     {/* Search */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="form-div bg-white rounded-lg border border-gray-200 p-6">
                         <SearchBillForm
                             defaultValue={query ? Number(query) : undefined}
                             error={message}
@@ -71,7 +74,7 @@ const BillsPage = async ({
                     </div>
 
                     {/* Bills Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bills bg-white rounded-lg border border-gray-200 overflow-hidden">
                         <table className="w-full">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -103,7 +106,8 @@ const BillsPage = async ({
                                             € {bill.total.toFixed(2)}
                                         </td>
                                         <td className="px-6 py-4  text-sm text-gray-500">
-                                            <DeleteButton id={bill.id} />
+                                            <EditBillButton id={bill.id} />
+                                            <DeleteBillButton id={bill.id} />
                                         </td>
                                     </tr>
                                 ))}
