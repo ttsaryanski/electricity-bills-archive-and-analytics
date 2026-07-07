@@ -2,6 +2,8 @@ export interface Bill {
     id: string;
     month: number;
     year: number;
+    day_consumption_kwh: number;
+    night_consumption_kwh: number;
     total: number;
     createdAt: Date;
     updatedAt: Date;

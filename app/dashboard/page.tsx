@@ -1,16 +1,18 @@
 import { getDashboardData } from "@/services/product.services";
 import { getBillsDashboardData } from "@/services/bill.services";
 
+import PrimaryAddress from "@/components/address/primary.address";
 import BillsMetrics from "@/components/bill/bills.metrics";
-import BillsChart from "@/components/bill/bills.charts";
+import BillsChartYear from "@/components/bill/bills.chart.year";
+import BillsChartFull from "@/components/bill/bills.chart.full";
+import BillsConsumptionChartYear from "@/components/bill/bills.consumption.chart.year";
 import BillsLevel from "@/components/bill/bills.level";
 import BillsEfficiency from "@/components/bill/bills.efficiency";
 
-import ProductChart from "@/components/product/products.charts";
-
 const Dashboard = async () => {
     const { stats, weeklyProductsData } = await getDashboardData();
-    const { monthlyBillsData } = await getBillsDashboardData();
+    const { monthlyBillsData, monthlyAllBillsData } =
+        await getBillsDashboardData();
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -18,15 +20,16 @@ const Dashboard = async () => {
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between">
-                        <div>
+                        <div className="basis-1/2">
                             <h1 className="text-2xl font-semibold text-gray-900">
                                 Dashboard
                             </h1>
                             <p className="text-sm text-gray-500">
-                                Welcome back! Here is an overview of your
-                                inventory.
+                                Welcome back! Here is an overview of your bills.
                             </p>
                         </div>
+
+                        <PrimaryAddress />
                     </div>
                 </div>
 
@@ -41,14 +44,37 @@ const Dashboard = async () => {
                         </div>
                     </div>
 
-                    {/* Inventory over time */}
+                    {/* Bills over all time */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2>Bills for full time</h2>
+                        </div>
+                        <div className="h-48">
+                            <BillsChartFull data={monthlyAllBillsData} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Consumption over year */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2>Consumption in kWh for the last 12 Months</h2>
+                        </div>
+                        <div className="h-48">
+                            <BillsConsumptionChartYear
+                                data={monthlyBillsData}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Bills over year */}
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2>Bills for the last 12 Months</h2>
                         </div>
                         <div className="h-48">
-                            <BillsChart data={monthlyBillsData} />
-                            {/* <ProductChart data={weeklyProductsData} /> */}
+                            <BillsChartYear data={monthlyBillsData} />
                         </div>
                     </div>
                 </div>
@@ -62,7 +88,7 @@ const Dashboard = async () => {
                             </h2>
                         </div>
                         <div className="space-y-3">
-                            {/* <BillsLevel stats={stats} /> */}
+                            <BillsLevel stats={stats} />
                         </div>
                     </div>
 
@@ -73,7 +99,7 @@ const Dashboard = async () => {
                                 Efficiency
                             </h2>
                         </div>
-                        {/* <BillsEfficiency stats={stats} /> */}
+                        <BillsEfficiency stats={stats} />
                     </div>
                 </div>
             </main>

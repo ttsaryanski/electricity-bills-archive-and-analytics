@@ -70,6 +70,8 @@ export async function getBillById(billId: string) {
             year: true,
             period: true,
             total: true,
+            day_consumption_kwh: true,
+            night_consumption_kwh: true,
             address: {
                 select: {
                     address: true,
@@ -79,7 +81,14 @@ export async function getBillById(billId: string) {
     });
 }
 
-export async function editBill(billId: string, total: number) {
+export async function editBill(
+    billId: string,
+    data: {
+        total: number;
+        day_consumption_kwh: number;
+        night_consumption_kwh: number;
+    },
+) {
     const existingBill = await prisma.bill.findFirst({
         where: { id: billId },
     });
@@ -92,7 +101,9 @@ export async function editBill(billId: string, total: number) {
             id: billId,
         },
         data: {
-            total: total,
+            total: data.total,
+            day_consumption_kwh: data.day_consumption_kwh,
+            night_consumption_kwh: data.night_consumption_kwh,
         },
     });
 }
@@ -102,6 +113,8 @@ export async function getTotalBills(userId: string, addressId: string) {
         where: { userId, addressId },
         select: {
             period: true,
+            day_consumption_kwh: true,
+            night_consumption_kwh: true,
             total: true,
         },
     });

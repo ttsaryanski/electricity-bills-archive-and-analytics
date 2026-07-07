@@ -35,7 +35,12 @@ const CreateBillForm = ({
     }, [addressError]);
 
     useEffect(() => {
-        if (!state.success && state.path !== "total") {
+        if (
+            !state.success &&
+            state.path !== "total" &&
+            state.path !== "day_consumption_kwh" &&
+            state.path !== "night_consumption_kwh"
+        ) {
             toast.error(state.message);
         }
         state.success = true;
@@ -137,6 +142,51 @@ const CreateBillForm = ({
                             </option>
                         ))}
                     </select>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label
+                        htmlFor="day_consumption_kwh"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                        Day Consumption (kWh) *
+                    </label>
+                    <input
+                        type="number"
+                        id="day_consumption_kwh"
+                        name="day_consumption_kwh"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-transparent"
+                    />
+                    {!state.success && state.path === "day_consumption_kwh" && (
+                        <p className="text-red-500 text-xs mt-2">
+                            {state.message}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label
+                        htmlFor="night_consumption_kwh"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                        Night Consumption (kWh) *
+                    </label>
+                    <input
+                        type="number"
+                        id="night_consumption_kwh"
+                        name="night_consumption_kwh"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-transparent"
+                    />
+                    {!state.success &&
+                        state.path === "night_consumption_kwh" && (
+                            <p className="text-red-500 text-xs mt-2">
+                                {state.message}
+                            </p>
+                        )}
                 </div>
             </div>
 

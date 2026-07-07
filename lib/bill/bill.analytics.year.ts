@@ -31,6 +31,24 @@ export async function getMonthlyBillsData(userId: string, addressId: string) {
 
         monthlyBillsData.push({
             month: monthLabel,
+            day_consumption_kwh: bills
+                .filter((bill) => {
+                    const billDate = new Date(bill.period);
+                    return billDate >= monthStart && billDate <= monthEnd;
+                })
+                .reduce(
+                    (acc, bill) => acc + Number(bill.day_consumption_kwh),
+                    0,
+                ),
+            night_consumption_kwh: bills
+                .filter((bill) => {
+                    const billDate = new Date(bill.period);
+                    return billDate >= monthStart && billDate <= monthEnd;
+                })
+                .reduce(
+                    (acc, bill) => acc + Number(bill.night_consumption_kwh),
+                    0,
+                ),
             bills: bills
                 .filter((bill) => {
                     const billDate = new Date(bill.period);

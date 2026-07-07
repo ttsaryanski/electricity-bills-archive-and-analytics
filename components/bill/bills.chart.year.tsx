@@ -17,7 +17,7 @@ interface ChartData {
     bills: number;
 }
 
-const BillsChart = ({ data }: { data: ChartData[] }) => {
+const BillsChartYear = ({ data }: { data: ChartData[] }) => {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -66,4 +66,4 @@ const BillsChart = ({ data }: { data: ChartData[] }) => {
     );
 };
 
-export default BillsChart;
+export default BillsChartYear;

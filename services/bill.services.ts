@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { getPrimaryAddress } from "@/services/address.services";
 
 import { requireCurrentUser } from "@/lib/auth";
-import { getMonthlyBillsData } from "@/lib/bill/bill.analytics";
+import { getMonthlyBillsData } from "@/lib/bill/bill.analytics.year";
+import { getAllMonthlyBillsData } from "@/lib/bill/bill.analytics.full";
 
 import {
     createBillSchema,
@@ -37,10 +38,14 @@ export async function createBill(
     const month = Number(formData.get("month"));
     const year = Number(formData.get("year"));
     const period = new Date(Date.UTC(year, month - 1, 1));
+    const day_consumption_kwh = Number(formData.get("day_consumption_kwh"));
+    const night_consumption_kwh = Number(formData.get("night_consumption_kwh"));
     const parsedData = createBillSchema.safeParse({
         month,
         year,
         period,
+        day_consumption_kwh,
+        night_consumption_kwh,
         total: Number(formData.get("total")),
         addressId,
     });
@@ -160,6 +165,8 @@ export async function editBill(
 ) {
     const parsedData = editBillSchema.safeParse({
         total: Number(formData.get("total")),
+        day_consumption_kwh: Number(formData.get("day_consumption_kwh")),
+        night_consumption_kwh: Number(formData.get("night_consumption_kwh")),
     });
     if (!parsedData.success) {
         return {
@@ -170,7 +177,7 @@ export async function editBill(
     }
 
     try {
-        await editBillRepo(billId, parsedData.data.total);
+        await editBillRepo(billId, parsedData.data);
     } catch (error) {
         return {
             success: false,
@@ -190,12 +197,13 @@ export async function getBillsDashboardData() {
         throw new Error("Primary address not found");
     }
 
-    const monthlyBillsData = await getMonthlyBillsData(
-        user.id,
-        primaryAddress.id,
-    );
+    const [monthlyBillsData, monthlyAllBillsData] = await Promise.all([
+        getMonthlyBillsData(user.id, primaryAddress.id),
+        getAllMonthlyBillsData(user.id, primaryAddress.id),
+    ]);
 
     return {
         monthlyBillsData,
+        monthlyAllBillsData,
     };
 }

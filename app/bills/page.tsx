@@ -85,6 +85,12 @@ const BillsPage = async ({
                                         Year
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Day (kWh)
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Night (kWh)
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                         Bill
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -106,6 +112,12 @@ const BillsPage = async ({
                                             <td className="px-6 py-4  text-sm text-gray-500">
                                                 {bill.year}
                                             </td>
+                                            <td className="px-6 py-4  text-sm text-gray-500">
+                                                {bill.day_consumption_kwh}
+                                            </td>
+                                            <td className="px-6 py-4  text-sm text-gray-500">
+                                                {bill.night_consumption_kwh}
+                                            </td>
                                             <td className="px-6 py-4  text-sm text-gray-900">
                                                 € {bill.total.toFixed(2)}
                                             </td>
@@ -120,7 +132,7 @@ const BillsPage = async ({
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={4}
+                                            colSpan={6}
                                             className="px-6 py-4 text-sm text-gray-500"
                                         >
                                             No bills found
