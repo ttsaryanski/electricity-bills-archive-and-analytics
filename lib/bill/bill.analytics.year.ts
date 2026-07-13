@@ -49,7 +49,7 @@ export async function getMonthlyBillsData(userId: string, addressId: string) {
                     (acc, bill) => acc + Number(bill.night_consumption_kwh),
                     0,
                 ),
-            bills: bills
+            bill: bills
                 .filter((bill) => {
                     const billDate = new Date(bill.period);
                     return billDate >= monthStart && billDate <= monthEnd;

@@ -4,8 +4,54 @@ import {
     getTotalProducts,
     getRecentProducts,
 } from "../../repositories/product.repository";
+import { getAllPrices } from "../../repositories/price.repository";
 
-export async function getDashboardStats(userId: string) {
+import {
+    getAllBillsCount,
+    getTotalBills,
+} from "../../repositories/bill.repository";
+
+import { metricsForBills } from "./tools/metrics";
+import { effeciencyForBills } from "./tools/effeciency";
+
+export async function getBillDashboardStats(userId: string, addressId: string) {
+    const totalBills = await getTotalBills(userId, addressId);
+    const totalPrices = await getAllPrices();
+    const bills = totalBills.map((bill) => ({
+        ...bill,
+        total: Number(bill.total),
+    }));
+    const prices = totalPrices.map((price) => ({
+        ...price,
+        day_price: Number(price.day_price),
+        night_price: Number(price.night_price),
+    }));
+
+    let {
+        billsForLastMonthCount,
+        isUp,
+        growthPercentage,
+        growthConsumptionPercentage,
+        isConsUp,
+        targetPeriod,
+        avgTotalBill,
+        isAvgUp,
+        avgBillPercentage,
+        lastBill,
+        isHasLastBill,
+        isConsumptionUp,
+        avgTotalConsumpion,
+        avgConsumptionPercentage,
+        lastConsumption,
+    } = metricsForBills(bills);
+
+    let { isPriceUp, lastDayPrice, lastNightPrice } = effeciencyForBills(
+        bills,
+        prices,
+    );
+
+    ////////////////////////////////////////////////////
+
     const [productsCount, lowStock, totalProductsPrisma, recentProductsPrisma] =
         await Promise.all([
             getAllProductsCount(userId),
@@ -63,10 +109,27 @@ export async function getDashboardStats(userId: string) {
             : 0;
 
     return {
+        billsForLastMonthCount,
+        isUp,
+        isConsUp,
+        growthPercentage,
+        growthConsumptionPercentage,
+        targetPeriod,
+        avgTotalBill,
+        isAvgUp,
+        avgBillPercentage,
+        lastBill,
+        isHasLastBill,
+        isConsumptionUp,
+        avgTotalConsumpion,
+        avgConsumptionPercentage,
+        lastConsumption,
+        isPriceUp,
+        lastDayPrice,
+        lastNightPrice,
+        ////////////////
         productsCount,
         lowStock,
-        totalProducts,
-        recentProducts,
         totalValue,
         inStockCount,
         inStockPercentage,
@@ -74,5 +137,6 @@ export async function getDashboardStats(userId: string) {
         lowStockPercentage,
         outOfStockCount,
         outOfStockPercentage,
+        recentProducts,
     };
 }

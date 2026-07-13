@@ -1,72 +1,188 @@
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export type statsProps = {
-    productsCount: number;
-    lowStock: number;
-    totalProducts: {
-        price: number;
-        quantity: number;
-        createdAt: Date;
-    }[];
+    billsForLastMonthCount: number;
+    isUp: boolean;
+    isConsUp: boolean;
+    isAvgUp: boolean;
+    growthPercentage: number | null;
+    growthConsumptionPercentage: number | null;
+    avgBillPercentage: number | null;
+    avgTotalBill: number | null;
+    avgTotalConsumpion: number | null;
+    isConsumptionUp: boolean;
+    avgConsumptionPercentage: number | null;
+    isPriceUp: boolean;
+    lastDayPrice: number | null;
+    lastNightPrice: number | null;
+    ////////////////////
     recentProducts: {
-        id: string;
         name: string;
-        sku: string | null;
-        price: number;
         quantity: number;
         lowStockAt: number | null;
-        userId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }[];
-    totalValue: number;
     inStockCount: number;
-    inStockPercentage: number;
-    lowStockCount: number;
-    lowStockPercentage: number;
+    inStockPercentage: number | null;
+    lowStockPercentage: number | null;
+    outOfStockPercentage: number | null;
     outOfStockCount: number;
-    outOfStockPercentage: number;
 };
 const BillsMetrics = ({ stats }: { stats: statsProps }) => {
     return (
         <>
             <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900">
-                    {stats.productsCount}
+                    {stats.billsForLastMonthCount}
                 </div>
-                <div className="text-sm text-gray-600">Total Products</div>
-                <div className="flex items-center justify-center mt-1">
-                    <span className="text-xs text-green-600">
-                        +{stats.productsCount}
-                    </span>
-                    <TrendingUp className="w-3 h-3 text-green-600 ml-1" />
+                <div className="text-sm text-gray-600">
+                    Bills for the same period
                 </div>
+                <div className="flex flex-col items-center justify-center">
+                    <div className="flex items-center justify-center">
+                        <span className="text-xs text-gray-600 mr-1">Bill</span>
+                        {stats.isUp ? (
+                            <span className="text-xs text-red-600">
+                                {stats.growthPercentage !== null
+                                    ? `${stats.growthPercentage.toFixed(2)}%`
+                                    : ""}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-green-600">
+                                {stats.growthPercentage !== null
+                                    ? `${stats.growthPercentage.toFixed(2)}%`
+                                    : ""}
+                            </span>
+                        )}
+                        {stats.growthPercentage !== null ? (
+                            <>
+                                {" "}
+                                {stats.isUp ? (
+                                    <TrendingUp className="w-3 h-3 text-red-600 ml-1" />
+                                ) : (
+                                    <TrendingDown className="w-3 h-3 text-green-600 ml-1" />
+                                )}
+                            </>
+                        ) : null}
+                    </div>
+
+                    <div className="flex items-center justify-center">
+                        <span className="text-xs text-gray-600 mr-1">
+                            Consumption
+                        </span>
+                        {stats.isConsUp ? (
+                            <span className="text-xs text-red-600">
+                                {stats.growthConsumptionPercentage !== null
+                                    ? `${stats.growthConsumptionPercentage.toFixed(2)}%`
+                                    : ""}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-green-600">
+                                {stats.growthConsumptionPercentage !== null
+                                    ? `${stats.growthConsumptionPercentage.toFixed(2)}%`
+                                    : ""}
+                            </span>
+                        )}
+                        {stats.growthPercentage !== null ? (
+                            <>
+                                {" "}
+                                {stats.isUp ? (
+                                    <TrendingUp className="w-3 h-3 text-red-600 ml-1" />
+                                ) : (
+                                    <TrendingDown className="w-3 h-3 text-green-600 ml-1" />
+                                )}
+                            </>
+                        ) : null}
+                    </div>
+                </div>
+                {stats.growthPercentage !== null ? (
+                    <div className="text-sm text-gray-600">
+                        Compared to the previous year
+                    </div>
+                ) : null}
             </div>
 
             <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900">
-                    ${Number(stats.totalValue).toFixed(0)}
+                    {Number(stats.avgTotalBill).toFixed(0)} €
                 </div>
-                <div className="text-sm text-gray-600">Total Value</div>
-                <div className="flex items-center justify-center mt-1">
-                    <span className="text-xs text-green-600">
-                        +${Number(stats.totalValue).toFixed(0)}
-                    </span>
-                    <TrendingUp className="w-3 h-3 text-green-600 ml-1" />
+                <div className="text-sm text-gray-600">
+                    AVG for the same period
                 </div>
+
+                {stats.avgBillPercentage !== 0 &&
+                stats.avgBillPercentage !== null ? (
+                    <>
+                        <div className="flex items-center justify-center mt-1">
+                            {stats.isAvgUp ? (
+                                <span className="text-xs text-red-600">
+                                    {stats.avgBillPercentage !== null
+                                        ? `${stats.avgBillPercentage.toFixed(2)}%`
+                                        : ""}
+                                </span>
+                            ) : (
+                                <span className="text-xs text-green-600">
+                                    {stats.avgBillPercentage !== null
+                                        ? `${stats.avgBillPercentage.toFixed(2)}%`
+                                        : ""}
+                                </span>
+                            )}
+                            {stats.avgBillPercentage !== 0 ? (
+                                <>
+                                    {" "}
+                                    {stats.isAvgUp ? (
+                                        <TrendingUp className="w-3 h-3 text-red-600 ml-1" />
+                                    ) : (
+                                        <TrendingDown className="w-3 h-3 text-green-600 ml-1" />
+                                    )}
+                                </>
+                            ) : null}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            Compared to the avg
+                        </div>
+                    </>
+                ) : null}
             </div>
 
             <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900">
-                    {stats.lowStock}
+                    {Number(stats.avgTotalConsumpion).toFixed(0)}{" "}
+                    <span className="text-sm">kWh</span>
                 </div>
-                <div className="text-sm text-gray-600">Low Stock</div>
-                <div className="flex items-center justify-center mt-1">
-                    <span className="text-xs text-green-600">
-                        +{stats.lowStock}
-                    </span>
-                    <TrendingUp className="w-3 h-3 text-green-600 ml-1" />
-                </div>
+                <div className="text-sm text-gray-600">AVG consumption</div>
+                {stats.avgConsumptionPercentage !== 0 &&
+                stats.avgConsumptionPercentage !== null ? (
+                    <>
+                        <div className="flex items-center justify-center mt-1">
+                            {stats.isConsumptionUp ? (
+                                <span className="text-xs text-red-600">
+                                    {stats.avgConsumptionPercentage !== null
+                                        ? `${stats.avgConsumptionPercentage.toFixed(2)}%`
+                                        : ""}
+                                </span>
+                            ) : (
+                                <span className="text-xs text-green-600">
+                                    {stats.avgConsumptionPercentage !== null
+                                        ? `${stats.avgConsumptionPercentage.toFixed(2)}%`
+                                        : ""}
+                                </span>
+                            )}
+                            {stats.avgConsumptionPercentage !== 0 ? (
+                                <>
+                                    {" "}
+                                    {stats.isConsumptionUp ? (
+                                        <TrendingUp className="w-3 h-3 text-red-600 ml-1" />
+                                    ) : (
+                                        <TrendingDown className="w-3 h-3 text-green-600 ml-1" />
+                                    )}
+                                </>
+                            ) : null}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            Compared to the avg
+                        </div>
+                    </>
+                ) : null}
             </div>
         </>
     );

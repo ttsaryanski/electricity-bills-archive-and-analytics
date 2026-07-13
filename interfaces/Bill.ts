@@ -22,3 +22,11 @@ export interface BillWithAddress {
         address: string;
     };
 }
+
+export interface BillWithAddressAndConsumption {
+    period: Date;
+    total: number;
+    day_consumption_kwh: number;
+    night_consumption_kwh: number;
+    total_consumption_kwh: number;
+}

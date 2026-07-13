@@ -4,6 +4,7 @@ import { CreateBillInput } from "@/validators/bill.schema";
 
 type CreateBillData = CreateBillInput & {
     userId: string;
+    total_consumption_kwh: number;
 };
 export async function createBill(data: CreateBillData) {
     const existingBill = await prisma.bill.findFirst({
@@ -87,6 +88,7 @@ export async function editBill(
         total: number;
         day_consumption_kwh: number;
         night_consumption_kwh: number;
+        total_consumption_kwh: number;
     },
 ) {
     const existingBill = await prisma.bill.findFirst({
@@ -104,6 +106,7 @@ export async function editBill(
             total: data.total,
             day_consumption_kwh: data.day_consumption_kwh,
             night_consumption_kwh: data.night_consumption_kwh,
+            total_consumption_kwh: data.total_consumption_kwh,
         },
     });
 }
@@ -111,11 +114,19 @@ export async function editBill(
 export async function getTotalBills(userId: string, addressId: string) {
     return prisma.bill.findMany({
         where: { userId, addressId },
+        orderBy: [{ period: "asc" }],
         select: {
             period: true,
             day_consumption_kwh: true,
             night_consumption_kwh: true,
+            total_consumption_kwh: true,
             total: true,
         },
+    });
+}
+
+export async function getAllBillsCount(userId: string, addressId: string) {
+    return prisma.bill.count({
+        where: { userId, addressId },
     });
 }

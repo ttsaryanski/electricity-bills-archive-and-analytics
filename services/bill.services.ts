@@ -8,6 +8,7 @@ import { getPrimaryAddress } from "@/services/address.services";
 import { requireCurrentUser } from "@/lib/auth";
 import { getMonthlyBillsData } from "@/lib/bill/bill.analytics.year";
 import { getAllMonthlyBillsData } from "@/lib/bill/bill.analytics.full";
+import { getBillDashboardStats } from "@/lib/bill/bill.stats";
 
 import {
     createBillSchema,
@@ -61,6 +62,9 @@ export async function createBill(
         await createBillRepo({
             ...parsedData.data,
             userId: user.id,
+            total_consumption_kwh:
+                parsedData.data.day_consumption_kwh +
+                parsedData.data.night_consumption_kwh,
         });
     } catch (error) {
         return {
@@ -177,7 +181,12 @@ export async function editBill(
     }
 
     try {
-        await editBillRepo(billId, parsedData.data);
+        await editBillRepo(billId, {
+            ...parsedData.data,
+            total_consumption_kwh:
+                parsedData.data.day_consumption_kwh +
+                parsedData.data.night_consumption_kwh,
+        });
     } catch (error) {
         return {
             success: false,
@@ -197,12 +206,14 @@ export async function getBillsDashboardData() {
         throw new Error("Primary address not found");
     }
 
-    const [monthlyBillsData, monthlyAllBillsData] = await Promise.all([
+    const [stats, monthlyBillsData, monthlyAllBillsData] = await Promise.all([
+        getBillDashboardStats(user.id, primaryAddress.id),
         getMonthlyBillsData(user.id, primaryAddress.id),
         getAllMonthlyBillsData(user.id, primaryAddress.id),
     ]);
 
     return {
+        stats,
         monthlyBillsData,
         monthlyAllBillsData,
     };

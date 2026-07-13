@@ -14,7 +14,8 @@ import {
 
 interface ChartData {
     month: string;
-    bills: number;
+    bill: number;
+    avg: number;
 }
 
 const BillsChartFull = ({ data }: { data: ChartData[] }) => {
@@ -43,13 +44,24 @@ const BillsChartFull = ({ data }: { data: ChartData[] }) => {
 
                 <Area
                     type="monotone"
-                    dataKey="bills"
+                    dataKey="bill"
                     stroke="#56a279"
                     fill="#56a279"
                     fillOpacity={0.2}
-                    strokeWidth={2}
-                    dot={{ fill: "#56a279", r: 2 }}
+                    strokeWidth={1}
+                    dot={{ fill: "#56a279", r: 1 }}
                     activeDot={{ fill: "#56a279", r: 4 }}
+                />
+
+                <Area
+                    type="monotone"
+                    dataKey="avg"
+                    stroke="#949494"
+                    fill="#949494"
+                    fillOpacity={0.2}
+                    strokeWidth={1}
+                    dot={{ fill: "#949494", r: 1 }}
+                    activeDot={{ fill: "#949494", r: 4 }}
                 />
 
                 <Tooltip

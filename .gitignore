@@ -45,3 +45,6 @@ next-env.d.ts
 .cursor
 .vscode
 
+db-query.sql
+pdf_extractor/**/*.csv
+pdf_extractor/**/*.pdf

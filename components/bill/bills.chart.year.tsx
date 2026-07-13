@@ -3,8 +3,9 @@
 import { Euro } from "lucide-react";
 
 import {
-    Area,
-    AreaChart,
+    Bar,
+    BarChart,
+    LabelList,
     CartesianGrid,
     ResponsiveContainer,
     Tooltip,
@@ -14,15 +15,15 @@ import {
 
 interface ChartData {
     month: string;
-    bills: number;
+    bill: number;
 }
 
 const BillsChartYear = ({ data }: { data: ChartData[] }) => {
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
+            <BarChart
                 data={data}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
                 <Euro />
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -41,16 +42,14 @@ const BillsChartYear = ({ data }: { data: ChartData[] }) => {
                     allowDecimals={false}
                 />
 
-                <Area
-                    type="monotone"
-                    dataKey="bills"
-                    stroke="#8b5cf6"
+                <Bar
+                    dataKey="bill"
                     fill="#8b5cf6"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                    dot={{ fill: "#8b5cf6", r: 2 }}
-                    activeDot={{ fill: "#8b5cf6", r: 4 }}
-                />
+                    barSize={20}
+                    radius={[3, 3, 0, 0]}
+                >
+                    <LabelList position="top" fontSize={12} />
+                </Bar>
 
                 <Tooltip
                     contentStyle={{
@@ -59,9 +58,9 @@ const BillsChartYear = ({ data }: { data: ChartData[] }) => {
                         borderRadius: "8px",
                         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                     }}
-                    labelStyle={{ color: "#374151", fontWeight: "500" }}
+                    labelStyle={{ color: "#3c5137", fontWeight: "500" }}
                 />
-            </AreaChart>
+            </BarChart>
         </ResponsiveContainer>
     );
 };

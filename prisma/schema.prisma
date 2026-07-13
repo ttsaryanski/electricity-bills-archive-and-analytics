@@ -37,6 +37,7 @@ model Bill {
   total                 Decimal  @db.Decimal(12, 2)
   day_consumption_kwh   Int
   night_consumption_kwh Int
+  total_consumption_kwh Int
 
   addressId String
   address   Address @relation(fields: [addressId], references: [id])
@@ -76,4 +77,15 @@ model User {
   products  Product[]
   bills     Bill[]
   addresses Address[]
+}
+
+model Price {
+  id           String   @id @default(cuid())
+  day_price    Decimal  @db.Decimal(8, 5)
+  night_price  Decimal  @db.Decimal(8, 5)
+  period_start DateTime
+  period_end   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

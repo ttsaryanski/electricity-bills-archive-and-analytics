@@ -7,11 +7,11 @@ import BillsChartYear from "@/components/bill/bills.chart.year";
 import BillsChartFull from "@/components/bill/bills.chart.full";
 import BillsConsumptionChartYear from "@/components/bill/bills.consumption.chart.year";
 import BillsLevel from "@/components/bill/bills.level";
-import BillsEfficiency from "@/components/bill/bills.efficiency";
+import BillsPrice from "@/components/bill/bills.price";
 
 const Dashboard = async () => {
-    const { stats, weeklyProductsData } = await getDashboardData();
-    const { monthlyBillsData, monthlyAllBillsData } =
+    // const { stats, weeklyProductsData } = await getDashboardData();
+    const { stats, monthlyBillsData, monthlyAllBillsData } =
         await getBillsDashboardData();
 
     return (
@@ -36,11 +36,24 @@ const Dashboard = async () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Key Metrics */}
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                            Key Metrics
-                        </h2>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="mb-6">
+                                Last Month Metrics ({stats.targetPeriod})
+                            </h2>
+
+                            {stats.isHasLastBill ? (
+                                <h2 className="text-right mb-6">
+                                    Last Month {stats.lastBill} € /{" "}
+                                    {stats.lastConsumption} kWh
+                                </h2>
+                            ) : (
+                                <h2 className="text-right mb-6 text-red-600">
+                                    No bill for the last month
+                                </h2>
+                            )}
+                        </div>
                         <div className="grid grid-cols-3 gap-6">
-                            {/* <BillsMetrics stats={stats} /> */}
+                            <BillsMetrics stats={stats} />
                         </div>
                     </div>
 
@@ -96,10 +109,10 @@ const Dashboard = async () => {
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-gray-900">
-                                Efficiency
+                                Actual Price
                             </h2>
                         </div>
-                        <BillsEfficiency stats={stats} />
+                        <BillsPrice stats={stats} />
                     </div>
                 </div>
             </main>
