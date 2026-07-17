@@ -4,7 +4,7 @@ Full-stack web application for storing electricity bills, managing addresses, an
 
 ## Overview
 
-This project is no longer an inventory system. It is now focused on:
+This project is focused on:
 
 - Monthly electricity bill archiving
 - Day and night kWh consumption tracking
@@ -49,6 +49,28 @@ The application is built with Next.js App Router, Prisma, PostgreSQL, Clerk auth
 - /add-bill : Create new bill for the active primary address
 - /address : Manage addresses and set primary address
 - /sign-in and /sign-up : Authentication pages
+
+## Screenshots
+
+### Home
+
+![Home page](screenshots/home.jpg)
+
+### Dashboard
+
+![Dashboard page](screenshots/dashboard.jpg)
+
+### Bills
+
+![Bills page](screenshots/bills.jpg)
+
+### Add Bill
+
+![Add bill page](screenshots/add-bill.jpg)
+
+### Address
+
+![Address page](screenshots/address.jpg)
 
 ## Data Model (Prisma)
 
