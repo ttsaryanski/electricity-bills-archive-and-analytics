@@ -3,6 +3,8 @@
 import { Euro } from "lucide-react";
 
 import {
+    Line,
+    LineChart,
     Area,
     AreaChart,
     CartesianGrid,
@@ -21,9 +23,9 @@ interface ChartData {
 const BillsChartFull = ({ data }: { data: ChartData[] }) => {
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
+            <LineChart
                 data={data}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
                 <Euro />
                 <CartesianGrid strokeDasharray="3 3" stroke="#dddddd" />
@@ -42,25 +44,26 @@ const BillsChartFull = ({ data }: { data: ChartData[] }) => {
                     allowDecimals={false}
                 />
 
-                <Area
+                <Line
                     type="monotone"
                     dataKey="bill"
-                    stroke="#56a279"
-                    fill="#56a279"
-                    fillOpacity={0.2}
+                    stroke="#3b47a5"
+                    // fill="#3b47a5"
+                    // fillOpacity={0.2}
                     strokeWidth={1}
-                    dot={{ fill: "#56a279", r: 1 }}
-                    activeDot={{ fill: "#56a279", r: 4 }}
+                    dot={{ fill: "#3b47a5", r: 1.5 }}
+                    activeDot={{ fill: "#3b47a5", r: 4 }}
                 />
 
-                <Area
+                <Line
                     type="monotone"
                     dataKey="avg"
                     stroke="#949494"
-                    fill="#949494"
-                    fillOpacity={0.2}
+                    strokeDasharray="3 4 5 2"
+                    // fill="#949494"
+                    // fillOpacity={0.2}
                     strokeWidth={1}
-                    dot={{ fill: "#949494", r: 1 }}
+                    dot={{ fill: "#949494", r: 1.5 }}
                     activeDot={{ fill: "#949494", r: 4 }}
                 />
 
@@ -73,7 +76,7 @@ const BillsChartFull = ({ data }: { data: ChartData[] }) => {
                     }}
                     labelStyle={{ color: "#374151", fontWeight: "500" }}
                 />
-            </AreaChart>
+            </LineChart>
         </ResponsiveContainer>
     );
 };

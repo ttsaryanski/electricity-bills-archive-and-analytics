@@ -41,12 +41,12 @@ const Dashboard = async () => {
 
                             {stats.isHasLastBill ? (
                                 <h2 className="text-right mb-6">
-                                    Last Month {stats.lastBill} € /{" "}
-                                    {stats.lastConsumption} kWh
+                                    {stats.lastBill} € / {stats.lastConsumption}{" "}
+                                    kWh
                                 </h2>
                             ) : (
                                 <h2 className="text-right mb-6 text-red-600">
-                                    No bill for the last month
+                                    No bill for the {stats.targetPeriod}
                                 </h2>
                             )}
                         </div>

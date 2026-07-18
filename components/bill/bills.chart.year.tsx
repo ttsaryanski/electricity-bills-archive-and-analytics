@@ -23,7 +23,7 @@ const BillsChartYear = ({ data }: { data: ChartData[] }) => {
         <ResponsiveContainer width="100%" height="100%">
             <BarChart
                 data={data}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 15, right: 0, left: 0, bottom: 5 }}
             >
                 <Euro />
                 <CartesianGrid strokeDasharray="3 3" stroke="#dddddd" />
@@ -48,7 +48,7 @@ const BillsChartYear = ({ data }: { data: ChartData[] }) => {
                     barSize={20}
                     radius={[3, 3, 0, 0]}
                 >
-                    <LabelList position="top" fontSize={12} />
+                    <LabelList position="top" fontSize={11} />
                 </Bar>
 
                 <Tooltip

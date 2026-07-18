@@ -5,9 +5,9 @@ export function metricsForBills(bills: BillWithAddressAndConsumption[]) {
     const currentYear = date.getFullYear();
     const currentMonth = date.getMonth() + 1;
     const targetPeriod = new Date(Date.UTC(currentYear, currentMonth - 2, 1));
-    const targetBills = bills.filter(
-        (bill) => bill.period.getMonth() === targetPeriod.getMonth(),
-    );
+    const targetBills = bills
+        .filter((bill) => bill.period.getMonth() === targetPeriod.getMonth())
+        .sort((a, b) => a.period.getTime() - b.period.getTime());
 
     let isUp: boolean = false;
     let isConsUp: boolean = false;

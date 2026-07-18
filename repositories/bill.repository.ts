@@ -114,7 +114,7 @@ export async function editBill(
 export async function getTotalBills(userId: string, addressId: string) {
     return prisma.bill.findMany({
         where: { userId, addressId },
-        orderBy: [{ period: "asc" }],
+        orderBy: [{ year: "asc" }, { month: "asc" }],
         select: {
             period: true,
             day_consumption_kwh: true,

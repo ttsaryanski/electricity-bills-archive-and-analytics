@@ -78,10 +78,10 @@ const BillsMetrics = ({ stats }: { stats: statsProps }) => {
                                     : ""}
                             </span>
                         )}
-                        {stats.growthPercentage !== null ? (
+                        {stats.growthConsumptionPercentage !== null ? (
                             <>
                                 {" "}
-                                {stats.isUp ? (
+                                {stats.isConsUp ? (
                                     <TrendingUp className="w-3 h-3 text-red-600 ml-1" />
                                 ) : (
                                     <TrendingDown className="w-3 h-3 text-green-600 ml-1" />
