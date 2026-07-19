@@ -29,8 +29,10 @@ jobs:
 
       - name: Prepare SSH key
         run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           install -m 600 /dev/null ~/.ssh/powertrack_key
-          printf '%s\n' "${{ secrets.POWERTRACK_SSH_PRIVATE_KEY }}" > ~/.ssh/powertrack_key
+          printf '%s\n' "${{ secrets.POWERTRACK_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/powertrack_key
 
       - name: Add host key
         run: |
@@ -42,6 +44,6 @@ jobs:
         env:
           ANSIBLE_HOST_KEY_CHECKING: "True"
         run: |
-          ansible-playbook -i [inventory.ini](http://_vscodecontentref_/0) playbooks/site.yml \
+          ansible-playbook -i inventory.ini playbooks/site.yml \
             --private-key ~/.ssh/powertrack_key \
             --extra-vars "repo_url=https://github.com/${{ github.repository }}.git repo_branch=${{ github.ref_name }} app_dir=${{ secrets.POWERTRACK_APP_DIR }} domain_name=${{ secrets.POWERTRACK_DOMAIN }} admin_email=${{ secrets.POWERTRACK_ADMIN_EMAIL }}"
