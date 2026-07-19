@@ -32,7 +32,6 @@
     npm_config_jobs: "1"
     npm_config_loglevel: "warn"
   register: npm_ci_result
-  ignore_errors: true
 
 # - name: Fallback to npm install when lockfile is out of sync
 #   command: npm install --no-audit --no-fund
