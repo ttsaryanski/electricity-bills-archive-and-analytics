@@ -1,0 +1,47 @@
+name: Deploy PowerTrack to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: powertrack-deploy-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Prepare SSH key
+        run: |
+          install -m 600 /dev/null ~/.ssh/powertrack_key
+          printf '%s\n' "${{ secrets.POWERTRACK_SSH_PRIVATE_KEY }}" > ~/.ssh/powertrack_key
+
+      - name: Add host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.POWERTRACK_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy with Ansible
+        working-directory: infra/ansible
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "True"
+        run: |
+          ansible-playbook -i [inventory.ini](http://_vscodecontentref_/0) playbooks/site.yml \
+            --private-key ~/.ssh/powertrack_key \
+            --extra-vars "repo_url=https://github.com/${{ github.repository }}.git repo_branch=${{ github.ref_name }} app_dir=${{ secrets.POWERTRACK_APP_DIR }} domain_name=${{ secrets.POWERTRACK_DOMAIN }} admin_email=${{ secrets.POWERTRACK_ADMIN_EMAIL }}"
