@@ -1,0 +1,8 @@
+- name: Configure and deploy PowerTrack
+  hosts: web
+  become: true
+  roles:
+    - common
+    - node
+    - nginx
+    - app

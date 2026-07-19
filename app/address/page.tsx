@@ -9,7 +9,9 @@ const AddressPage = async () => {
     let message = "";
     try {
         const res = await getAddresses();
-        addresses = res.sort((a, b) => (a.isPrimary ? -1 : 1));
+        addresses = res.sort(
+            (a, b) => Number(b.isPrimary) - Number(a.isPrimary),
+        );
     } catch (error) {
         message =
             error instanceof Error

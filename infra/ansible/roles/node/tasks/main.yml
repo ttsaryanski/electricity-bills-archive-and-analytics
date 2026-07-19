@@ -1,0 +1,14 @@
+- name: Install NodeSource repo
+  shell: curl -fsSL https://deb.nodesource.com/setup_{{ node_major }}.x | bash -
+  args:
+    executable: /bin/bash
+
+- name: Install nodejs
+  apt:
+    name: nodejs
+    state: present
+
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: true

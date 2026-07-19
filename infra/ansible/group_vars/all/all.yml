@@ -1,0 +1,9 @@
+app_name: powertrack
+app_dir: /var/www/powertrack
+repo_url: https://github.com/ttsaryanski/electricity-bills-archive-and-analytics
+repo_branch: main
+node_major: "22"
+swap_size_mb: 4096
+app_port: 3000
+domain_name: powertrack.duckdns.org
+admin_email: ttsaryanski@gmail.com

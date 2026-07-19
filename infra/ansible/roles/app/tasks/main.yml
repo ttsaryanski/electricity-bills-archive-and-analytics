@@ -1,0 +1,71 @@
+- name: Ensure app directory exists
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Checkout application
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: "{{ repo_branch }}"
+    update: true
+    force: true
+  become_user: "{{ ansible_user }}"
+
+- name: Place environment file
+  template:
+    src: powertrack.env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+
+- name: Install dependencies with npm ci
+  command: npm ci --no-audit --no-fund --omit=optional
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ ansible_user }}"
+  environment:
+    npm_config_jobs: "1"
+    npm_config_loglevel: "warn"
+  register: npm_ci_result
+  ignore_errors: true
+
+# - name: Fallback to npm install when lockfile is out of sync
+#   command: npm install --no-audit --no-fund
+#   args:
+#     chdir: "{{ app_dir }}"
+#   become_user: "{{ ansible_user }}"
+#   when: npm_ci_result is failed
+
+- name: Generate prisma client
+  command: npx prisma generate
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ ansible_user }}"
+
+- name: Run prisma migrations
+  command: npx prisma migrate deploy
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ ansible_user }}"
+
+- name: Build Next.js app
+  command: npm run build
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ ansible_user }}"
+  environment:
+    NODE_OPTIONS: "--max-old-space-size=1536"
+
+- name: Start or restart app with PM2
+  shell: |
+    pm2 describe {{ app_name }} >/dev/null 2>&1 && pm2 restart {{ app_name }} || pm2 start npm --name {{ app_name }} -- start
+    pm2 save
+  args:
+    chdir: "{{ app_dir }}"
+    executable: /bin/bash
+  become_user: "{{ ansible_user }}"

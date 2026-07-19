@@ -1,0 +1,43 @@
+- name: Update apt cache
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  apt:
+    name:
+      - git
+      - curl
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Check if swap file exists
+  stat:
+    path: /swapfile
+  register: swapfile_stat
+
+- name: Allocate swap file
+  command: fallocate -l {{ swap_size_mb }}M /swapfile
+  when: not swapfile_stat.stat.exists
+
+- name: Set swap file permissions
+  file:
+    path: /swapfile
+    mode: "0600"
+  when: not swapfile_stat.stat.exists
+
+- name: Format swap file
+  command: mkswap /swapfile
+  when: not swapfile_stat.stat.exists
+
+- name: Enable swap file
+  command: swapon /swapfile
+  when: not swapfile_stat.stat.exists
+
+- name: Persist swap in fstab
+  lineinfile:
+    path: /etc/fstab
+    line: "/swapfile none swap sw 0 0"
+    state: present
