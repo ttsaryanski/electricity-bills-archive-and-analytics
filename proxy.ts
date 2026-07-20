@@ -9,7 +9,7 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 10;
+const MAX_REQUESTS = 20;
 const hits = new Map<string, { count: number; resetAt: number }>();
 
 function getClientKey(req: Request) {
