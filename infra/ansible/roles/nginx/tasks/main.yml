@@ -1,3 +1,9 @@
+- name: Check if certificate exists
+  stat:
+    path: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+  register: ssl_cert
+  become: true
+
 - name: Deploy nginx site config
   template:
     src: powertrack.conf.j2
@@ -23,6 +29,5 @@
     enabled: true
 
 - name: Enable HTTPS with certbot
-  command: certbot --nginx -d {{ domain_name }} --non-interactive --agree-tos -m {{ admin_email }} --redirect
-  args:
-    creates: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+  command: certbot --nginx -d {{ domain_name }} --non-interactive --agree-tos -m {{ admin_email }} --redirect --reinstall
+  when: not ssl_cert.stat.exists
