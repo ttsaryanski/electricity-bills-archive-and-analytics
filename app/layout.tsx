@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Statistics App",
+    title: "Power Track",
     description: "Electricity consumption statistics",
 };
 
