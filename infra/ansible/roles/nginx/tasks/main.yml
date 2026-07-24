@@ -22,10 +22,13 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: Restart nginx
+- name: Validate nginx config
+  command: nginx -t
+
+- name: Reload nginx
   service:
     name: nginx
-    state: restarted
+    state: reloaded
     enabled: true
 
 - name: Enable HTTPS with certbot

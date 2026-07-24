@@ -1,6 +1,12 @@
+- name: Resolve slot deployment variables
+  set_fact:
+    deployed_app_dir: "{{ app_slot_dir | default(app_dir) }}"
+    deployed_app_name: "{{ app_slot_name | default(app_name) }}"
+    deployed_app_port: "{{ app_slot_port | default(app_port) }}"
+
 - name: Ensure app directory exists
   file:
-    path: "{{ app_dir }}"
+    path: "{{ deployed_app_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
@@ -9,7 +15,7 @@
 - name: Checkout application
   git:
     repo: "{{ repo_url }}"
-    dest: "{{ app_dir }}"
+    dest: "{{ deployed_app_dir }}"
     version: "{{ repo_branch }}"
     update: true
     force: true
@@ -18,56 +24,84 @@
 - name: Place environment file
   template:
     src: powertrack.env.j2
-    dest: "{{ app_dir }}/.env"
+    dest: "{{ deployed_app_dir }}/.env"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0600"
+  vars:
+    app_port: "{{ deployed_app_port }}"
 
 - name: Install dependencies with npm ci
   command: npm ci --no-audit --no-fund
   args:
-    chdir: "{{ app_dir }}"
+    chdir: "{{ deployed_app_dir }}"
   become_user: "{{ ansible_user }}"
   environment:
     npm_config_jobs: "1"
     npm_config_loglevel: "warn"
   register: npm_ci_result
 
-# - name: Fallback to npm install when lockfile is out of sync
-#   command: npm install --no-audit --no-fund
-#   args:
-#     chdir: "{{ app_dir }}"
-#   become_user: "{{ ansible_user }}"
-#   when: npm_ci_result is failed
-
 - name: Generate prisma client
   command: npx prisma generate
   args:
-    chdir: "{{ app_dir }}"
+    chdir: "{{ deployed_app_dir }}"
   become_user: "{{ ansible_user }}"
 
 - name: Run prisma migrations
   command: npx prisma migrate deploy
   args:
-    chdir: "{{ app_dir }}"
+    chdir: "{{ deployed_app_dir }}"
   become_user: "{{ ansible_user }}"
 
 - name: Build Next.js app
   command: npm run build
   args:
-    chdir: "{{ app_dir }}"
+    chdir: "{{ deployed_app_dir }}"
   become_user: "{{ ansible_user }}"
   environment:
     NODE_OPTIONS: "--max-old-space-size=1536"
 
 - name: Start or restart app with PM2
   shell: |
-    pm2 describe {{ app_name }} >/dev/null 2>&1 && pm2 restart {{ app_name }} || pm2 start npm --name {{ app_name }} -- start
+    if pm2 describe {{ deployed_app_name }} >/dev/null 2>&1; then
+      PORT={{ deployed_app_port }} pm2 restart {{ deployed_app_name }} --update-env
+    else
+      pm2 start npm --name {{ deployed_app_name }} -- start -- -p {{ deployed_app_port }}
+    fi
     pm2 save
   args:
-    chdir: "{{ app_dir }}"
+    chdir: "{{ deployed_app_dir }}"
     executable: /bin/bash
   become_user: "{{ ansible_user }}"
+
+- name: Wait for slot app port to be reachable
+  wait_for:
+    host: 127.0.0.1
+    port: "{{ deployed_app_port | int }}"
+    state: started
+    delay: 2
+    timeout: 90
+
+- name: Verify PM2 process is online
+  shell: pm2 describe {{ deployed_app_name }} | grep -E "status\s+.*online"
+  args:
+    executable: /bin/bash
+  become_user: "{{ ansible_user }}"
+
+- name: Wait for slot app HTTP response
+  uri:
+    url: "http://127.0.0.1:{{ deployed_app_port }}/"
+    method: GET
+    status_code:
+      - 200
+      - 301
+      - 302
+      - 307
+      - 308
+  register: app_healthcheck
+  retries: 20
+  delay: 3
+  until: app_healthcheck.status in [200, 301, 302, 307, 308]
 
 - name: Configure PM2 startup
   shell: pm2 startup systemd -u {{ ansible_user }} --hp /home/{{ ansible_user }}

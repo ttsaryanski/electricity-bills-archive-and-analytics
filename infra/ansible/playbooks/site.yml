@@ -4,5 +4,137 @@
   roles:
     - common
     - node
-    - nginx
-    - app
+
+  pre_tasks:
+    - name: Read current active deployment color marker
+      stat:
+        path: "{{ active_color_file }}"
+      register: active_color_marker
+
+    - name: Load current active deployment color from marker
+      slurp:
+        src: "{{ active_color_file }}"
+      register: active_color_data
+      when: active_color_marker.stat.exists
+
+    - name: Resolve current deployment color
+      set_fact:
+        marker_color: "{{ (active_color_data.content | b64decode | trim) if active_color_marker.stat.exists else '' }}"
+
+    - name: Normalize current deployment color
+      set_fact:
+        current_color: "{{ marker_color if marker_color in ['blue', 'green'] else active_color }}"
+
+    - name: Normalize forced target color
+      set_fact:
+        forced_target_color_normalized: "{{ (forced_target_color | default('auto')) | lower | trim }}"
+
+    - name: Validate forced target color value
+      assert:
+        that:
+          - forced_target_color_normalized in ['auto', 'blue', 'green']
+        fail_msg: "forced_target_color must be one of: auto, blue, green"
+
+    - name: Resolve target deployment color
+      set_fact:
+        target_color: >-
+          {{
+            ('green' if current_color == 'blue' else 'blue')
+            if forced_target_color_normalized == 'auto'
+            else forced_target_color_normalized
+          }}
+
+    - name: Ensure forced target is not already active
+      assert:
+        that:
+          - target_color != current_color
+        fail_msg: "target_color equals current_color ({{ current_color }}). Pick the opposite color or use auto."
+
+    - name: Resolve blue/green deployment paths, ports and process names
+      set_fact:
+        current_app_port: "{{ blue_port if current_color == 'blue' else green_port }}"
+        target_app_port: "{{ blue_port if target_color == 'blue' else green_port }}"
+        target_app_dir: "{{ app_base_dir }}-{{ target_color }}"
+        target_app_name: "{{ app_name_base }}-{{ target_color }}"
+
+  tasks:
+    - name: Ensure nginx is serving currently active slot before rollout
+      include_role:
+        name: nginx
+      vars:
+        active_app_port: "{{ current_app_port }}"
+
+    - name: Deploy application to inactive slot
+      include_role:
+        name: app
+      vars:
+        app_slot_dir: "{{ target_app_dir }}"
+        app_slot_name: "{{ target_app_name }}"
+        app_slot_port: "{{ target_app_port }}"
+
+    - name: Smoke test inactive slot before switch
+      uri:
+        url: "http://127.0.0.1:{{ target_app_port }}"
+        method: GET
+        status_code:
+          - 200
+          - 301
+          - 302
+          - 307
+          - 308
+
+    - name: Switch traffic to inactive slot and rollback on failure
+      block:
+        - name: Point nginx to new active slot
+          include_role:
+            name: nginx
+          vars:
+            active_app_port: "{{ target_app_port }}"
+
+        - name: Verify post-switch health through nginx
+          uri:
+            url: http://127.0.0.1/healthz
+            method: GET
+            headers:
+              Host: "{{ domain_name }}"
+            status_code: 200
+
+        - name: Verify post-switch app response through nginx
+          uri:
+            url: http://127.0.0.1/
+            method: GET
+            headers:
+              Host: "{{ domain_name }}"
+            status_code:
+              - 200
+              - 301
+              - 302
+              - 307
+              - 308
+
+        - name: Persist newly active deployment color
+          copy:
+            dest: "{{ active_color_file }}"
+            content: "{{ target_color }}\n"
+            owner: root
+            group: root
+            mode: "0644"
+
+      rescue:
+        - name: Roll back nginx to previous slot
+          include_role:
+            name: nginx
+          vars:
+            active_app_port: "{{ current_app_port }}"
+
+        - name: Persist previous active deployment color
+          copy:
+            dest: "{{ active_color_file }}"
+            content: "{{ current_color }}\n"
+            owner: root
+            group: root
+            mode: "0644"
+
+        - name: Fail deployment after rollback
+          fail:
+            msg: "Blue/green switch failed. Rolled traffic back to {{ current_color }} slot."

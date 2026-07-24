@@ -7,3 +7,11 @@ swap_size_mb: 4096
 app_port: 3000
 domain_name: powertrack.duckdns.org
 admin_email: ttsaryanski@gmail.com
+
+# Blue/green deployment settings
+active_color: blue
+blue_port: 3001
+green_port: 3002
+app_base_dir: /var/www/powertrack
+app_name_base: powertrack
+active_color_file: /etc/powertrack-active-color

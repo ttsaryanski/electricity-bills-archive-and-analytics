@@ -14,7 +14,7 @@ const Dashboard = async () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="p-8">
+            <main className="main p-8">
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between">
@@ -33,7 +33,7 @@ const Dashboard = async () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Key Metrics */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="mb-6">
                                 Last Month Metrics ({stats.targetPeriod})
@@ -56,7 +56,7 @@ const Dashboard = async () => {
                     </div>
 
                     {/* Bills over all time */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2>
                                 Bills for full time{" "}
@@ -77,7 +77,7 @@ const Dashboard = async () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Consumption over year */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2>Consumption in kWh for the last 12 Months</h2>
                         </div>
@@ -89,7 +89,7 @@ const Dashboard = async () => {
                     </div>
 
                     {/* Bills over year */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2>Bills for the last 12 Months</h2>
                         </div>
@@ -101,7 +101,7 @@ const Dashboard = async () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Bills Levels */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Months with the highest / lowest consumption
@@ -113,7 +113,7 @@ const Dashboard = async () => {
                     </div>
 
                     {/* Efficiency */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Price

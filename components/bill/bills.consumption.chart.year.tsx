@@ -23,7 +23,7 @@ const BillsConsumptionChartYear = ({ data }: { data: ChartData[] }) => {
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart
                 data={data}
-                margin={{ top: 5, right: 3, left: 0, bottom: 5 }}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
                 <Zap />
                 <CartesianGrid strokeDasharray="3 3" stroke="#dddddd" />

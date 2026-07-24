@@ -47,6 +47,10 @@ body {
 }
 
 @media (max-width: 500px) {
+  .main {
+    padding: calc(var(--spacing) * 3);
+  }
+
   .bills main {
     padding: calc(var(--spacing) * 4);
   }
@@ -80,5 +84,9 @@ body {
 
   .login {
     width: auto;
+  }
+
+  .responsive {
+    padding: 0.5rem;
   }
 }
