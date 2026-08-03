@@ -9,7 +9,7 @@ export async function getMonthlyBillsData(userId: string, addressId: string) {
     for (let i = 11; i >= 0; i--) {
         const monthStart = new Date(
             now.getFullYear(),
-            now.getMonth() - i,
+            now.getMonth() - i - 2,
             1,
             0,
             0,
@@ -19,7 +19,7 @@ export async function getMonthlyBillsData(userId: string, addressId: string) {
 
         const monthEnd = new Date(
             now.getFullYear(),
-            now.getMonth() - i + 1,
+            now.getMonth() - i - 1,
             0,
             23,
             59,
