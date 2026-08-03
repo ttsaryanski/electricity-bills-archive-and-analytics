@@ -22,6 +22,7 @@ The application is built with Next.js App Router, Prisma, PostgreSQL, Clerk auth
 - Per-user isolated data model
 - Address management with a required primary address
 - Bill CRUD with validation and duplicate prevention (unique user+address+month+year)
+- In-app bill data extraction from uploaded PDF files (auto-fill day/night consumption and total amount)
 - Paginated bill listing with year filtering
 - Dashboard with:
     - Last-month metrics and trend deltas
@@ -69,6 +70,10 @@ The application is built with Next.js App Router, Prisma, PostgreSQL, Clerk auth
 ### Add Bill
 
 ![Add bill page](screenshots/add-bill.jpg)
+
+### Add Bill from file
+
+![Add bill page](screenshots/add-bill-from-file.jpg)
 
 ### Address
 
@@ -195,6 +200,24 @@ or
 ```bash
 python extract_energo_pro_euro.py
 ```
+
+## In-App PDF Bill Extraction
+
+The Add Bill form supports direct PDF upload and attempts to auto-populate:
+
+- Day consumption (kWh)
+- Night consumption (kWh)
+- Total amount
+
+Current extraction behavior:
+
+- Uses pdfjs-dist in the client to read invoice text
+- Includes handling for common Cyrillic mojibake (cp1251 decoding issues)
+- Supports grouped tariff rows and split row segments
+- Tries to parse multi-section invoices (including double tariff groups)
+- Applies reliability checks to reduce wrong auto-imported values
+
+If the parser cannot extract reliable values, the form keeps manual input as fallback.
 
 ## Architecture Notes
 

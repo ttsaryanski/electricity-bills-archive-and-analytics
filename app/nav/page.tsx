@@ -43,7 +43,7 @@ const NavigationBar = () => {
         },
         {
             name: "Add Bill",
-            href: "/add-bill",
+            href: "/bills/add-bill",
             current: false,
             icon: Plus,
         },

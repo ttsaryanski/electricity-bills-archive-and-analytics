@@ -26,43 +26,14 @@ import {
     getAllBillsWithQuery,
 } from "@/repositories/bill.repository";
 
-type CreateBillState = {
-    success: boolean;
-    message: string;
-    path?: string;
-};
-export async function createBill(
-    _prevState: CreateBillState,
-    formData: FormData,
-    addressId: string,
-) {
+import { CreateBillInput } from "@/validators/bill.schema";
+
+export async function createBill(data: CreateBillInput) {
     const user = await requireCurrentUser();
 
-    // const success = checkBillRateLimit(user.id);
-    // if (!success) {
-    //     throw new Error("Rate limit exceeded");
-    // }
-
-    const month = Number(formData.get("month"));
-    const year = Number(formData.get("year"));
-    const period = new Date(Date.UTC(year, month - 1, 1));
-    const day_consumption_kwh = Number(formData.get("day_consumption_kwh"));
-    const night_consumption_kwh = Number(formData.get("night_consumption_kwh"));
-    const parsedData = createBillSchema.safeParse({
-        month,
-        year,
-        period,
-        day_consumption_kwh,
-        night_consumption_kwh,
-        total: Number(formData.get("total")),
-        addressId,
-    });
+    const parsedData = createBillSchema.safeParse(data);
     if (!parsedData.success) {
-        return {
-            success: false,
-            message: parsedData.error.issues[0].message,
-            path: parsedData.error.issues[0].path[0] as string,
-        };
+        throw new Error(parsedData.error.issues[0].message);
     }
 
     try {
@@ -74,16 +45,10 @@ export async function createBill(
                 parsedData.data.night_consumption_kwh,
         });
     } catch (error) {
-        return {
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Failed to create bill",
-            path: "",
-        };
+        throw new Error(
+            error instanceof Error ? error.message : "Failed to create bill",
+        );
     }
-    redirect("/bills");
 }
 
 export async function getBillsPaginated(
