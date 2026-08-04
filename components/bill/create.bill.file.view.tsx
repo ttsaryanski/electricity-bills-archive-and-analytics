@@ -1,9 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const CreateBillFileView = ({ file }: { file: File | null }) => {
     const [url, setUrl] = useState<string | null>(null);
+
+    const [width, setWidth] = useState(0);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (!file) {
@@ -15,14 +24,38 @@ const CreateBillFileView = ({ file }: { file: File | null }) => {
         return () => URL.revokeObjectURL(objectUrl);
     }, [file]);
 
-    if (!url) return <div>No PDF selected</div>;
+    useEffect(() => {
+        if (!url || !containerRef.current) {
+            return;
+        }
+
+        setWidth(containerRef.current.getBoundingClientRect().width);
+
+        const resizeObserver = new ResizeObserver((entries) => {
+            if (entries[0]) {
+                setWidth(entries[0].contentRect.width);
+            }
+        });
+
+        resizeObserver.observe(containerRef.current);
+
+        return () => resizeObserver.disconnect();
+    }, [url]);
 
     return (
-        <iframe
-            src={url}
-            title="Bill PDF preview"
-            className="w-full h-full rounded border"
-        />
+        <div ref={containerRef}>
+            {!url ? (
+                <div>No PDF selected</div>
+            ) : (
+                <Document
+                    file={url}
+                    loading="Loading PDF..."
+                    error="Failed to load PDF"
+                >
+                    <Page pageNumber={1} width={width} />
+                </Document>
+            )}
+        </div>
     );
 };
 
