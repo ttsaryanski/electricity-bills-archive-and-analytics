@@ -1,18 +1,46 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import dynamic from "next/dynamic";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+const Document = dynamic(
+    () => import("react-pdf").then((mod) => mod.Document),
+    {
+        ssr: false,
+    },
+);
+const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
+    ssr: false,
+});
 
 const CreateBillFileView = ({ file }: { file: File | null }) => {
     const [url, setUrl] = useState<string | null>(null);
+    const [pdfReady, setPdfReady] = useState(false);
 
     const [width, setWidth] = useState(0);
     const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+
+        const setupPdfWorker = async () => {
+            const { pdfjs } = await import("react-pdf");
+            pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+            if (mounted) {
+                setPdfReady(true);
+            }
+        };
+
+        setupPdfWorker();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (!file) {
@@ -46,6 +74,8 @@ const CreateBillFileView = ({ file }: { file: File | null }) => {
         <div ref={containerRef}>
             {!url ? (
                 <div>No PDF selected</div>
+            ) : !pdfReady ? (
+                <div>Loading PDF viewer...</div>
             ) : (
                 <Document
                     file={url}
