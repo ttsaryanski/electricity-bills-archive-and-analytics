@@ -473,11 +473,14 @@ const CreateBillForm = ({
                 onDrop={handleDrop}
             >
                 <label
-                    htmlFor="cover-photo"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    htmlFor="upload pdf"
+                    className="block text-sm font-medium text-gray-700"
                 >
                     or Upload PDF of the Bill (optional)
                 </label>
+                <span className="text-gray-500 text-xs">
+                    (only for ENERGO PRO Bulgaria customers for now)
+                </span>
                 <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
                         <div className="mt-4 flex text-sm/6 text-gray-600">

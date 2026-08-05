@@ -204,6 +204,7 @@ python extract_energo_pro_euro.py
 ## In-App PDF Bill Extraction
 
 The Add Bill form supports direct PDF upload and attempts to auto-populate:
+(only for ENERGO PRO Bulgaria customers for now)
 
 - Day consumption (kWh)
 - Night consumption (kWh)
