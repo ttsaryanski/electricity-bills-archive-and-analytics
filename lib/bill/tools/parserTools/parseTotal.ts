@@ -32,6 +32,7 @@ export function parseTotal(rows: TokenRow[]): number | null {
             prices.push(numbers[0]);
         }
     }
+
     candidate = prices.length > 0 ? Math.max(...prices) : null;
 
     return candidate;
