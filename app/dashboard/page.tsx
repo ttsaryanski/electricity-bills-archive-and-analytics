@@ -1,4 +1,5 @@
 import { getBillsDashboardData } from "@/services/bill.services";
+import { getPrimaryAddress } from "@/services/address.services";
 
 import PrimaryAddress from "@/components/address/primary.address";
 import BillsMetrics from "@/components/bill/bills.metrics";
@@ -11,6 +12,18 @@ import BillsPrice from "@/components/bill/bills.price";
 const Dashboard = async () => {
     const { stats, priceStats, monthlyBillsData, monthlyAllBillsData } =
         await getBillsDashboardData();
+
+    let primAddress: string | null = null;
+    let message = "";
+    try {
+        const primaryAddress = await getPrimaryAddress();
+        primAddress = primaryAddress ? primaryAddress.address : null;
+    } catch (error) {
+        message =
+            error instanceof Error
+                ? error.message
+                : "Failed to fetch primary address";
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -27,7 +40,7 @@ const Dashboard = async () => {
                             </p>
                         </div>
 
-                        <PrimaryAddress />
+                        <PrimaryAddress address={primAddress} error={message} />
                     </div>
                 </div>
 

@@ -1,36 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getPrimaryAddress } from "@/services/address.services";
+import { useState } from "react";
 
 import CreateBillFileView from "@/components/bill/create.bill.file.view";
 import CreateBillForm from "@/components/bill/create.bill.form";
 
 import { AddressesProps } from "@/components/address/addresses";
 
-const CreateBillBody = () => {
+type CreateBillBodyProps = {
+    primaryAddress: AddressesProps | null;
+    addressError: string;
+};
+
+const CreateBillBody = ({
+    primaryAddress,
+    addressError,
+}: CreateBillBodyProps) => {
     const [file, setFile] = useState<File | null>(null);
-    const [primaryAddress, setPrimaryAddress] = useState<AddressesProps | null>(
-        null,
-    );
-    const [message, setMessage] = useState<string>("");
-
-    useEffect(() => {
-        const fetchPrimaryAddress = async () => {
-            try {
-                const address = await getPrimaryAddress();
-                setPrimaryAddress(address);
-            } catch (error) {
-                setMessage(
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to fetch addresses",
-                );
-            }
-        };
-
-        fetchPrimaryAddress();
-    }, []);
 
     const getFile = (fileData: File | null) => {
         setFile(fileData);
@@ -46,7 +32,7 @@ const CreateBillBody = () => {
                 <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                     <CreateBillForm
                         primaryAddress={primaryAddress}
-                        addressError={message}
+                        addressError={addressError}
                         getFile={getFile}
                     />
                 </div>

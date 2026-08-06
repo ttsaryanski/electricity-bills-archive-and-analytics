@@ -1,4 +1,5 @@
 import { getBillsPaginated } from "@/services/bill.services";
+import { getPrimaryAddress } from "@/services/address.services";
 
 import Pagination from "@/components/pagination";
 import DeleteBillButton from "@/components/bill/delete.bill.button";
@@ -21,21 +22,24 @@ const BillsPage = async ({
     let bills: Bill[] = [];
     let totalCount = 0;
     let message = "";
+    let primAddress: string | null = null;
     try {
-        const { totalCount: tCount, bills: res } = await getBillsPaginated(
-            query,
-            page,
-            pageSize,
-        );
-        bills = res.map((bill) => ({
+        const [res, primaryAddress] = await Promise.all([
+            getBillsPaginated(query, page, pageSize),
+            getPrimaryAddress(),
+        ]);
+        bills = res.bills.map((bill) => ({
             ...bill,
             total: Number(bill.total),
         }));
-        totalCount = tCount;
+        totalCount = res.totalCount;
+        primAddress = primaryAddress ? primaryAddress.address : null;
         query = "";
     } catch (error) {
         message =
-            error instanceof Error ? error.message : "Failed to fetch bills";
+            error instanceof Error
+                ? error.message
+                : "Failed to fetch bills or primary address";
     }
 
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -60,7 +64,7 @@ const BillsPage = async ({
                                 Manage your bills and track payment statuses.
                             </p>
                         </div>
-                        <PrimaryAddress />
+                        <PrimaryAddress address={primAddress} />
                     </div>
                 </div>
 

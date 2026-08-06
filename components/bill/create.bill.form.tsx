@@ -51,8 +51,16 @@ const CreateBillForm = ({
 
         const parseFile = async () => {
             try {
-                const { parsedDayCons, parsedNightCons, parsedTotal } =
-                    await parseBillFile(file);
+                const {
+                    parsedPeriod,
+                    parsedDayCons,
+                    parsedNightCons,
+                    parsedTotal,
+                } = await parseBillFile(file);
+
+                setIsConverted(false);
+                setMonth(parsedPeriod.month);
+                setYear(parsedPeriod.year);
                 setDayConsumption(parsedDayCons);
                 setNightConsumption(parsedNightCons);
                 setTotal(parsedTotal);

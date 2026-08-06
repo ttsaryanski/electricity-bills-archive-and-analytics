@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+
 import { MoveRight } from "lucide-react";
 
-import { getPrimaryAddress } from "@/services/address.services";
+import { toast } from "sonner";
 
-const PrimaryAddress = () => {
-    const [address, setAddress] = useState<string | null>(null);
+type PrimaryAddressProps = {
+    address: string | null;
+    error?: string;
+};
 
+const PrimaryAddress = ({ address, error }: PrimaryAddressProps) => {
     useEffect(() => {
-        const fetchPrimaryAddress = async () => {
-            const primaryAddress = await getPrimaryAddress();
-            setAddress(primaryAddress?.address || null);
-        };
-
-        fetchPrimaryAddress();
-    }, []);
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     return (
         <div className="primary basis-1/2">
