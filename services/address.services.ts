@@ -11,6 +11,7 @@ import {
     createAddress as createAddressRepo,
     setAddressPrimary as setAddressPrimaryRepo,
     getPrimaryAddress as getPrimaryAddressRepo,
+    getDemoAddress as getDemoAddressRepo,
 } from "@/repositories/address.repository";
 
 export async function getAddresses() {
@@ -130,4 +131,14 @@ export async function getPrimaryAddress() {
     }
 
     return primaryAddress;
+}
+
+export async function getDemoAddress() {
+    const demoAddress = await getDemoAddressRepo();
+
+    if (!demoAddress) {
+        throw new Error("Demo address not found");
+    }
+
+    return demoAddress;
 }

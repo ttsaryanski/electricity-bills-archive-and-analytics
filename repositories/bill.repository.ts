@@ -125,6 +125,20 @@ export async function getTotalBills(userId: string, addressId: string) {
     });
 }
 
+export async function getDemoTotalBills(addressId: string) {
+    return prisma.bill.findMany({
+        where: { addressId },
+        orderBy: [{ year: "asc" }, { month: "asc" }],
+        select: {
+            period: true,
+            day_consumption_kwh: true,
+            night_consumption_kwh: true,
+            total_consumption_kwh: true,
+            total: true,
+        },
+    });
+}
+
 export async function getAllBillsCount(userId: string, addressId: string) {
     return prisma.bill.count({
         where: { userId, addressId },

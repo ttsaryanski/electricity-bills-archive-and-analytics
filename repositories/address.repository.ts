@@ -12,6 +12,13 @@ export async function getPrimaryAddress(userId: string) {
     });
 }
 
+export async function getDemoAddress() {
+    return prisma.address.findFirst({
+        where: { address: "Demo" },
+        select: { address: true, id: true },
+    });
+}
+
 export async function deleteAddressById(addressId: string, userId: string) {
     await prisma.address.delete({
         where: {

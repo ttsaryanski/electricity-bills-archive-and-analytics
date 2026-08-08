@@ -3,14 +3,26 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { getPrimaryAddress } from "@/services/address.services";
+import { getDemoAddress, getPrimaryAddress } from "@/services/address.services";
 
 import { requireCurrentUser } from "@/lib/auth";
 // import { checkBillRateLimit } from "@/lib/bill/bill.rate-limit";
-import { getMonthlyBillsData } from "@/lib/bill/bill.analytics.year";
-import { getAllMonthlyBillsData } from "@/lib/bill/bill.analytics.full";
-import { getBillDashboardStats } from "@/lib/bill/bill.stats";
-import { getPeriodicData } from "@/lib/price/price.analytics";
+import {
+    getMonthlyBillsData,
+    getDemoMonthlyBillsData,
+} from "@/lib/bill/bill.analytics.year";
+import {
+    getAllMonthlyBillsData,
+    getDemoAllMonthlyBillsData,
+} from "@/lib/bill/bill.analytics.full";
+import {
+    getBillDashboardStats,
+    getDemoDashboardStats,
+} from "@/lib/bill/bill.stats";
+import {
+    getPeriodicData,
+    getDemoPeriodicData,
+} from "@/lib/price/price.analytics";
 
 import {
     createBillSchema,
@@ -24,6 +36,7 @@ import {
     getBillById as getBillByIdRepo,
     getAllBillsCountWithQuery,
     getAllBillsWithQuery,
+    getAllBillsCount,
 } from "@/repositories/bill.repository";
 
 import { CreateBillInput } from "@/validators/bill.schema";
@@ -183,12 +196,44 @@ export async function getBillsDashboardData() {
         throw new Error("Primary address not found");
     }
 
+    const [
+        billsCount,
+        stats,
+        priceStats,
+        monthlyBillsData,
+        monthlyAllBillsData,
+    ] = await Promise.all([
+        getAllBillsCount(user.id, primaryAddress.id),
+        getBillDashboardStats(user.id, primaryAddress.id),
+        getPeriodicData(user.id, primaryAddress.id),
+        getMonthlyBillsData(user.id, primaryAddress.id),
+        getAllMonthlyBillsData(user.id, primaryAddress.id),
+    ]);
+
+    const hasBills = billsCount > 0;
+
+    return {
+        hasBills,
+        stats,
+        priceStats,
+        monthlyBillsData,
+        monthlyAllBillsData,
+    };
+}
+
+export async function getDemoDashboardData() {
+    const demoAddress = await getDemoAddress();
+
+    if (!demoAddress) {
+        throw new Error("Demo address not found");
+    }
+
     const [stats, priceStats, monthlyBillsData, monthlyAllBillsData] =
         await Promise.all([
-            getBillDashboardStats(user.id, primaryAddress.id),
-            getPeriodicData(user.id, primaryAddress.id),
-            getMonthlyBillsData(user.id, primaryAddress.id),
-            getAllMonthlyBillsData(user.id, primaryAddress.id),
+            getDemoDashboardStats(demoAddress.id),
+            getDemoPeriodicData(demoAddress.id),
+            getDemoMonthlyBillsData(demoAddress.id),
+            getDemoAllMonthlyBillsData(demoAddress.id),
         ]);
 
     return {
