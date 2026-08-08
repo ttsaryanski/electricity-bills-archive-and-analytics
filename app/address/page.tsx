@@ -38,7 +38,7 @@ const AddressPage = async () => {
                     </div>
                 </div>
 
-                {addresses.length === 0 && (
+                {addresses.length === 0 && !message && (
                     <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 max-w-2xl">
                         Add your first address to continue to Dashboard and
                         Bills.

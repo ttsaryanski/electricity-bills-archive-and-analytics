@@ -1,5 +1,7 @@
-import { getBillsDashboardData } from "@/services/bill.services";
-import { getPrimaryAddress } from "@/services/address.services";
+import Link from "next/link";
+
+import { getDemoDashboardData } from "@/services/bill.services";
+import { getDemoAddress } from "@/services/address.services";
 
 import PrimaryAddress from "@/components/address/primary.address";
 import BillsMetrics from "@/components/bill/bills.metrics";
@@ -8,20 +10,23 @@ import BillsChartFull from "@/components/bill/bills.chart.full";
 import BillsConsumptionChartYear from "@/components/bill/bills.consumption.chart.year";
 import BillsLevel from "@/components/bill/bills.level";
 import BillsPrice from "@/components/bill/bills.price";
+import AddressFallBack from "@/components/address/address.fallback";
 import DashboardFallBack from "@/components/dashboard/dashboard.fallback";
-import DashboardDemo from "@/components/dashboard/dashboard.demo";
 
-const Dashboard = async () => {
-    const primaryAddress = await getPrimaryAddress();
-    const primAddress = primaryAddress.address;
+const DashboardDemo = async () => {
+    let address: Awaited<ReturnType<typeof getDemoAddress>> | null = null;
+    try {
+        address = await getDemoAddress();
+    } catch (error) {
+        return <AddressFallBack />;
+    }
 
-    let dashboardData: Awaited<
-        ReturnType<typeof getBillsDashboardData>
-    > | null = null;
+    let dashboardData: Awaited<ReturnType<typeof getDemoDashboardData>> | null =
+        null;
     let message = "";
 
     try {
-        dashboardData = await getBillsDashboardData();
+        dashboardData = await getDemoDashboardData();
     } catch (error) {
         message =
             error instanceof Error
@@ -32,23 +37,14 @@ const Dashboard = async () => {
     if (!dashboardData) {
         return (
             <DashboardFallBack
-                primaryAddress={primAddress}
+                primaryAddress={address.address}
                 message={message || "No dashboard data available."}
             />
         );
     }
 
-    const {
-        hasBills,
-        stats,
-        priceStats,
-        monthlyBillsData,
-        monthlyAllBillsData,
-    } = dashboardData;
-
-    if (!hasBills) {
-        return <DashboardDemo />;
-    }
+    const { stats, priceStats, monthlyBillsData, monthlyAllBillsData } =
+        dashboardData;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -65,7 +61,26 @@ const Dashboard = async () => {
                             </p>
                         </div>
 
-                        <PrimaryAddress address={primAddress} />
+                        <PrimaryAddress address={address.address} />
+                    </div>
+                </div>
+
+                <div className="mb-8 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
+                    <p className="text-sm font-medium">
+                        You are seeing demo data because your account does not
+                        have bills yet.
+                    </p>
+                    <p className="mt-1 text-sm">
+                        Add your first bill to replace this preview with real
+                        analytics for your address.
+                    </p>
+                    <div className="mt-3">
+                        <Link
+                            href="/bills/add-bill"
+                            className="inline-flex rounded-md bg-amber-900 px-3 py-2 text-sm font-medium text-white hover:bg-amber-800"
+                        >
+                            Add your first bill
+                        </Link>
                     </div>
                 </div>
 
@@ -165,4 +180,4 @@ const Dashboard = async () => {
     );
 };
 
-export default Dashboard;
+export default DashboardDemo;
