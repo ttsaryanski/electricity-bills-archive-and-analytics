@@ -107,12 +107,12 @@ export async function setAddressPrimary(addressId: string) {
     redirect("/bills");
 }
 
-export async function getPrimaryAddress() {
+export async function findPrimaryAddress() {
     const user = await requireCurrentUser();
 
     try {
         const primaryAddress = await getPrimaryAddressRepo(user.id);
-        return primaryAddress;
+        return primaryAddress ?? null;
     } catch (error) {
         throw new Error(
             error instanceof Error
@@ -120,4 +120,14 @@ export async function getPrimaryAddress() {
                 : "Failed to fetch primary address",
         );
     }
+}
+
+export async function getPrimaryAddress() {
+    const primaryAddress = await findPrimaryAddress();
+
+    if (!primaryAddress) {
+        throw new Error("No primary address found");
+    }
+
+    return primaryAddress;
 }

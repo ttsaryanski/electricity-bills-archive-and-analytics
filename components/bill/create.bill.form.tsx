@@ -13,11 +13,9 @@ import { parseBillFile } from "@/lib/bill/tools/bill.file.parser";
 import { AddressesProps } from "@/components/address/addresses";
 const CreateBillForm = ({
     primaryAddress,
-    addressError,
     getFile,
 }: {
     primaryAddress: AddressesProps | null;
-    addressError: string;
     getFile: (fileData: File | null) => void;
 }) => {
     const router = useRouter();
@@ -37,12 +35,6 @@ const CreateBillForm = ({
         total: "",
         file: "",
     });
-
-    useEffect(() => {
-        if (addressError) {
-            toast.error(addressError);
-        }
-    }, [addressError]);
 
     useEffect(() => {
         if (!file) {

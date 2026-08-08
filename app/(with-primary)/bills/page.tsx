@@ -1,4 +1,4 @@
-import { getBillsPaginated } from "@/services/bill.services";
+﻿import { getBillsPaginated } from "@/services/bill.services";
 import { getPrimaryAddress } from "@/services/address.services";
 
 import Pagination from "@/components/pagination";
@@ -18,28 +18,23 @@ const BillsPage = async ({
     let query = (params.query ?? "").trim();
     const page = Math.max(1, Number(params.page ?? 1));
     const pageSize = 9;
+    const primaryAddress = await getPrimaryAddress();
+    const primAddress = primaryAddress.address;
 
     let bills: Bill[] = [];
     let totalCount = 0;
     let message = "";
-    let primAddress: string | null = null;
     try {
-        const [res, primaryAddress] = await Promise.all([
-            getBillsPaginated(query, page, pageSize),
-            getPrimaryAddress(),
-        ]);
+        const res = await getBillsPaginated(query, page, pageSize);
         bills = res.bills.map((bill) => ({
             ...bill,
             total: Number(bill.total),
         }));
         totalCount = res.totalCount;
-        primAddress = primaryAddress ? primaryAddress.address : null;
         query = "";
     } catch (error) {
         message =
-            error instanceof Error
-                ? error.message
-                : "Failed to fetch bills or primary address";
+            error instanceof Error ? error.message : "Failed to fetch bills";
     }
 
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));

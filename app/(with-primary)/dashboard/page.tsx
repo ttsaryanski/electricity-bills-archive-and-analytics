@@ -10,20 +10,50 @@ import BillsLevel from "@/components/bill/bills.level";
 import BillsPrice from "@/components/bill/bills.price";
 
 const Dashboard = async () => {
-    const { stats, priceStats, monthlyBillsData, monthlyAllBillsData } =
-        await getBillsDashboardData();
+    const primaryAddress = await getPrimaryAddress();
+    const primAddress = primaryAddress.address;
 
-    let primAddress: string | null = null;
+    let dashboardData: Awaited<
+        ReturnType<typeof getBillsDashboardData>
+    > | null = null;
     let message = "";
+
     try {
-        const primaryAddress = await getPrimaryAddress();
-        primAddress = primaryAddress ? primaryAddress.address : null;
+        dashboardData = await getBillsDashboardData();
     } catch (error) {
         message =
             error instanceof Error
                 ? error.message
-                : "Failed to fetch primary address";
+                : "Failed to fetch dashboard data";
     }
+
+    if (!dashboardData) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <main className="main p-8">
+                    <div className="mb-8 flex items-center justify-between">
+                        <div className="basis-1/2">
+                            <h1 className="text-2xl font-semibold text-gray-900">
+                                Dashboard
+                            </h1>
+                            <p className="text-sm text-gray-500">
+                                Welcome back! Here is an overview of your bills.
+                            </p>
+                        </div>
+
+                        <PrimaryAddress address={primAddress} />
+                    </div>
+
+                    <div className="rounded-lg border border-red-200 bg-white p-6 text-red-600">
+                        {message || "No dashboard data available."}
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    const { stats, priceStats, monthlyBillsData, monthlyAllBillsData } =
+        dashboardData;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -40,7 +70,7 @@ const Dashboard = async () => {
                             </p>
                         </div>
 
-                        <PrimaryAddress address={primAddress} error={message} />
+                        <PrimaryAddress address={primAddress} />
                     </div>
                 </div>
 

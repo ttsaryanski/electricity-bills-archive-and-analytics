@@ -1,20 +1,10 @@
-import CreateBillBody from "@/components/bill/create.bill.body";
+﻿import CreateBillBody from "@/components/bill/create.bill.body";
 import { getPrimaryAddress } from "@/services/address.services";
 
 import { AddressesProps } from "@/components/address/addresses";
 
 const AddBillPage = async () => {
-    let primaryAddress: AddressesProps | null = null;
-    let addressError = "";
-
-    try {
-        primaryAddress = await getPrimaryAddress();
-    } catch (error) {
-        addressError =
-            error instanceof Error
-                ? error.message
-                : "Failed to fetch primary address";
-    }
+    const primaryAddress: AddressesProps = await getPrimaryAddress();
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -32,10 +22,7 @@ const AddBillPage = async () => {
                     </div>
                 </div>
 
-                <CreateBillBody
-                    primaryAddress={primaryAddress}
-                    addressError={addressError}
-                />
+                <CreateBillBody primaryAddress={primaryAddress} />
             </main>
         </div>
     );

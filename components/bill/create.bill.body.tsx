@@ -9,13 +9,9 @@ import { AddressesProps } from "@/components/address/addresses";
 
 type CreateBillBodyProps = {
     primaryAddress: AddressesProps | null;
-    addressError: string;
 };
 
-const CreateBillBody = ({
-    primaryAddress,
-    addressError,
-}: CreateBillBodyProps) => {
+const CreateBillBody = ({ primaryAddress }: CreateBillBodyProps) => {
     const [file, setFile] = useState<File | null>(null);
 
     const getFile = (fileData: File | null) => {
@@ -32,7 +28,6 @@ const CreateBillBody = ({
                 <div className="responsive bg-white rounded-lg border border-gray-200 p-6">
                     <CreateBillForm
                         primaryAddress={primaryAddress}
-                        addressError={addressError}
                         getFile={getFile}
                     />
                 </div>
