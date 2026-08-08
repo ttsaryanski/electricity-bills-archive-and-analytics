@@ -479,7 +479,8 @@ const CreateBillForm = ({
                     or Upload PDF of the Bill (optional)
                 </label>
                 <span className="text-gray-500 text-xs">
-                    (only for ENERGO PRO Bulgaria customers for now)
+                    (only for <strong>ENERGO-PRO</strong> Bulgaria customers for
+                    now)
                 </span>
                 <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
