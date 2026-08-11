@@ -66,3 +66,21 @@ variable "vm_admin_username" {
   type        = string
   description = "Admin username for the Azure Virtual Machine"
 }
+
+# ----------------- Prometheus -----------------
+variable "prometheus_disk_name" {
+  type        = string
+  description = "Managed disk name for Prometheus TSDB"
+}
+
+variable "prometheus_disk_size_gb" {
+  type        = number
+  description = "Prometheus data disk size in GB"
+  default     = 64
+}
+
+variable "prometheus_disk_sku" {
+  type        = string
+  description = "Prometheus data disk SKU"
+  default     = "StandardSSD_LRS"
+}

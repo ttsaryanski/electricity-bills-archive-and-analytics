@@ -1,0 +1,102 @@
+- name: Install Prometheus
+  apt:
+    name: prometheus
+    state: present
+    update_cache: true
+
+- name: Ensure Prometheus config directory exists
+  file:
+    path: /etc/prometheus
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check Prometheus data device exists
+  stat:
+    path: "{{ prometheus_data_device }}"
+  register: prometheus_data_device_stat
+
+- name: Fail if Prometheus data device is missing
+  fail:
+    msg: "Prometheus data device {{ prometheus_data_device }} not found. Verify Terraform disk attachment (LUN 10)."
+  when: not prometheus_data_device_stat.stat.exists
+
+- name: Detect filesystem type on Prometheus data device
+  command: "lsblk -no FSTYPE {{ prometheus_data_device }}"
+  register: prometheus_device_fstype
+  changed_when: false
+
+- name: Create ext4 filesystem on Prometheus data device (first run only)
+  filesystem:
+    fstype: ext4
+    dev: "{{ prometheus_data_device }}"
+  when: prometheus_device_fstype.stdout | trim == ""
+
+- name: Read UUID from Prometheus data device
+  command: "blkid -s UUID -o value {{ prometheus_data_device }}"
+  register: prometheus_device_uuid
+  changed_when: false
+
+- name: Fail if UUID cannot be read from Prometheus data device
+  fail:
+    msg: "Could not read UUID from {{ prometheus_data_device }}."
+  when: prometheus_device_uuid.stdout | trim == ""
+
+- name: Ensure Prometheus storage mountpoint exists
+  file:
+    path: "{{ prometheus_storage_path }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: "0755"
+
+- name: Mount Prometheus data device by UUID
+  mount:
+    path: "{{ prometheus_storage_path }}"
+    src: "UUID={{ prometheus_device_uuid.stdout | trim }}"
+    fstype: ext4
+    opts: defaults,nofail
+    state: mounted
+
+- name: Read UUID from mounted Prometheus storage
+  command: "findmnt -n -o UUID --target {{ prometheus_storage_path }}"
+  register: prometheus_mounted_uuid
+  changed_when: false
+
+- name: Assert Prometheus storage is mounted from expected UUID
+  assert:
+    that:
+      - prometheus_mounted_uuid.stdout | trim == prometheus_device_uuid.stdout | trim
+    fail_msg: "Prometheus storage is not mounted from expected UUID."
+
+- name: Ensure Prometheus storage ownership
+  file:
+    path: "{{ prometheus_storage_path }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: "0755"
+
+- name: Deploy Prometheus config
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Ensure Prometheus service options include retention and storage path
+  lineinfile:
+    path: /etc/default/prometheus
+    regexp: "^ARGS="
+    line: 'ARGS="--storage.tsdb.path={{ prometheus_storage_path }} --storage.tsdb.retention.time={{ prometheus_retention_time }} --web.listen-address={{ prometheus_listen_address }} --config.file=/etc/prometheus/prometheus.yml"'
+    create: true
+  notify: Restart Prometheus
+
+- name: Ensure Prometheus service is enabled and running
+  systemd:
+    name: prometheus
+    enabled: true
+    state: started

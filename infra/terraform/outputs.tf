@@ -14,3 +14,7 @@ output "ssh" {
   value = "ssh ${var.vm_admin_username}@${azurerm_public_ip.app-pip.ip_address}"
 }
 
+output "prometheus_disk_id" {
+  value = azurerm_managed_disk.prometheus_data_disk.id
+}
+

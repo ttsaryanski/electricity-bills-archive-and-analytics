@@ -15,3 +15,13 @@ green_port: 3002
 app_base_dir: /var/www/powertrack
 app_name_base: powertrack
 active_color_file: /etc/powertrack-active-color
+
+# Prometheus
+prometheus_scrape_interval: "15s"
+prometheus_evaluation_interval: "15s"
+prometheus_retention_time: "15d"
+prometheus_app_target: "127.0.0.1:80"
+prometheus_listen_address: "0.0.0.0:9090"
+prometheus_allowed_ip: "127.0.0.1"
+prometheus_data_device: "/dev/disk/azure/scsi1/lun10"
+prometheus_storage_path: "/var/lib/prometheus"

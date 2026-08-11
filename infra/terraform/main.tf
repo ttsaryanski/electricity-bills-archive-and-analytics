@@ -172,3 +172,31 @@ resource "azurerm_linux_virtual_machine" "app-vm" {
     env     = "Production"
   }
 }
+
+# ----------------- Prometheus disk -----------------
+resource "azurerm_managed_disk" "prometheus_data_disk" {
+  name                 = var.prometheus_disk_name
+  location             = azurerm_resource_group.arg.location
+  resource_group_name  = azurerm_resource_group.arg.name
+  storage_account_type = var.prometheus_disk_sku
+  create_option        = "Empty"
+  disk_size_gb         = var.prometheus_disk_size_gb
+
+  tags = {
+    project = "PowerTrack"
+    env     = "Production"
+    role    = "prometheus-data"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# ----------------- Prometheus disk attach to VM -----------------
+resource "azurerm_virtual_machine_data_disk_attachment" "prometheus_data_attach" {
+  managed_disk_id    = azurerm_managed_disk.prometheus_data_disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.app-vm.id
+  lun                = 10
+  caching            = "ReadWrite"
+}

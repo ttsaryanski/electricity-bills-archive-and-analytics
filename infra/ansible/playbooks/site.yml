@@ -4,6 +4,7 @@
   roles:
     - common
     - node
+    - prometheus
 
   pre_tasks:
     - name: Read current active deployment color marker

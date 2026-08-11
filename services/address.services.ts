@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { trackOperation } from "@/lib/observability/track.operation";
 import { requireCurrentUser } from "@/lib/auth";
 import { createAddressSchema } from "@/validators/address.schema";
 import {
@@ -15,18 +16,23 @@ import {
 } from "@/repositories/address.repository";
 
 export async function getAddresses() {
-    const user = await requireCurrentUser();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
 
-    try {
-        const addresses = await getAllAddresses(user.id);
-        return addresses;
-    } catch (error) {
-        throw new Error(
-            error instanceof Error
-                ? error.message
-                : "Failed to fetch addresses",
-        );
-    }
+            try {
+                const addresses = await getAllAddresses(user.id);
+                return addresses;
+            } catch (error) {
+                throw new Error(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch addresses",
+                );
+            }
+        },
+        { operation: "getAddresses" },
+    );
 }
 
 export async function deleteAddress(addressId: string) {
@@ -56,37 +62,42 @@ export async function createAddress(
     _prevState: CreateAddressState,
     formData: FormData,
 ) {
-    const user = await requireCurrentUser();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
 
-    const parsedData = createAddressSchema.safeParse({
-        address: formData.get("address"),
-    });
-    if (!parsedData.success) {
-        return {
-            // error: parsedData.error.issues[0].message,
-            // key: Date.now(),
-            success: false,
-            message: parsedData.error.issues[0].message,
-        };
-    }
+            const parsedData = createAddressSchema.safeParse({
+                address: formData.get("address"),
+            });
+            if (!parsedData.success) {
+                return {
+                    // error: parsedData.error.issues[0].message,
+                    // key: Date.now(),
+                    success: false,
+                    message: parsedData.error.issues[0].message,
+                };
+            }
 
-    try {
-        await createAddressRepo({
-            ...parsedData.data,
-            userId: user.id,
-        });
-    } catch (error) {
-        return {
-            // error: "Failed to create address",
-            // key: Date.now(),
-            success: false,
-            message:
-                error instanceof Error
-                    ? error.message
-                    : "Failed to create address",
-        };
-    }
-    redirect("/address");
+            try {
+                await createAddressRepo({
+                    ...parsedData.data,
+                    userId: user.id,
+                });
+            } catch (error) {
+                return {
+                    // error: "Failed to create address",
+                    // key: Date.now(),
+                    success: false,
+                    message:
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to create address",
+                };
+            }
+            redirect("/address");
+        },
+        { operation: "createAddress" },
+    );
 }
 
 export async function setAddressPrimary(addressId: string) {

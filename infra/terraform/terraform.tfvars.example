@@ -15,7 +15,7 @@ subnet_name = ""
 
 # ----------------- PIP -----------------
 public_ip_name    = ""
-domain_name_label = "p"
+domain_name_label = ""
 
 # ----------------- NIC -----------------
 network_interface_name = ""
@@ -23,3 +23,8 @@ network_interface_name = ""
 # ----------------- VM -----------------
 vm_name           = ""
 vm_admin_username = ""
+
+# ----------------- VM -----------------
+prometheus_disk_name    = ""
+prometheus_disk_size_gb = 123
+prometheus_disk_sku     = ""

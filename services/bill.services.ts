@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { getDemoAddress, getPrimaryAddress } from "@/services/address.services";
 
+import { trackOperation } from "@/lib/observability/track.operation";
 import { requireCurrentUser } from "@/lib/auth";
 // import { checkBillRateLimit } from "@/lib/bill/bill.rate-limit";
 import {
@@ -42,26 +43,33 @@ import {
 import { CreateBillInput } from "@/validators/bill.schema";
 
 export async function createBill(data: CreateBillInput) {
-    const user = await requireCurrentUser();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
 
-    const parsedData = createBillSchema.safeParse(data);
-    if (!parsedData.success) {
-        throw new Error(parsedData.error.issues[0].message);
-    }
+            const parsedData = createBillSchema.safeParse(data);
+            if (!parsedData.success) {
+                throw new Error(parsedData.error.issues[0].message);
+            }
 
-    try {
-        await createBillRepo({
-            ...parsedData.data,
-            userId: user.id,
-            total_consumption_kwh:
-                parsedData.data.day_consumption_kwh +
-                parsedData.data.night_consumption_kwh,
-        });
-    } catch (error) {
-        throw new Error(
-            error instanceof Error ? error.message : "Failed to create bill",
-        );
-    }
+            try {
+                await createBillRepo({
+                    ...parsedData.data,
+                    userId: user.id,
+                    total_consumption_kwh:
+                        parsedData.data.day_consumption_kwh +
+                        parsedData.data.night_consumption_kwh,
+                });
+            } catch (error) {
+                throw new Error(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to create bill",
+                );
+            }
+        },
+        { operation: "createBill" },
+    );
 }
 
 export async function getBillsPaginated(
@@ -69,50 +77,55 @@ export async function getBillsPaginated(
     page: number,
     pageSize: number,
 ) {
-    const user = await requireCurrentUser();
-    const primaryAddress = await getPrimaryAddress();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
+            const primaryAddress = await getPrimaryAddress();
 
-    // const success = checkBillRateLimit(user.id);
-    // if (!success) {
-    //     throw new Error("Rate limit exceeded");
-    // }
+            // const success = checkBillRateLimit(user.id);
+            // if (!success) {
+            //     throw new Error("Rate limit exceeded");
+            // }
 
-    let where = {
-        userId: user.id,
-        addressId: primaryAddress?.id,
-    };
-    const queryNumber = Number(query);
-    const isInteger = Number.isInteger(queryNumber);
-    const parsedData = yearQuerySchema.safeParse({
-        year: queryNumber,
-    });
-    if (!parsedData.success && query) {
-        throw new Error(parsedData.error.issues[0].message);
-    }
-    if (isInteger) {
-        where = {
-            userId: user.id,
-            addressId: primaryAddress?.id,
-            ...(query ? { year: queryNumber } : {}),
-        };
-    } else {
-        where = {
-            userId: user.id,
-            addressId: primaryAddress?.id,
-        };
-    }
+            let where = {
+                userId: user.id,
+                addressId: primaryAddress?.id,
+            };
+            const queryNumber = Number(query);
+            const isInteger = Number.isInteger(queryNumber);
+            const parsedData = yearQuerySchema.safeParse({
+                year: queryNumber,
+            });
+            if (!parsedData.success && query) {
+                throw new Error(parsedData.error.issues[0].message);
+            }
+            if (isInteger) {
+                where = {
+                    userId: user.id,
+                    addressId: primaryAddress?.id,
+                    ...(query ? { year: queryNumber } : {}),
+                };
+            } else {
+                where = {
+                    userId: user.id,
+                    addressId: primaryAddress?.id,
+                };
+            }
 
-    if (!primaryAddress) {
-        throw new Error("Primary address not found");
-    }
+            if (!primaryAddress) {
+                throw new Error("Primary address not found");
+            }
 
-    const totalCount = await getAllBillsCountWithQuery(where);
-    const bills = await getAllBillsWithQuery(where, page, pageSize);
+            const totalCount = await getAllBillsCountWithQuery(where);
+            const bills = await getAllBillsWithQuery(where, page, pageSize);
 
-    return {
-        totalCount,
-        bills,
-    };
+            return {
+                totalCount,
+                bills,
+            };
+        },
+        { operation: "getBillsPaginated" },
+    );
 }
 
 export async function deleteBill(billId: string) {
@@ -189,36 +202,41 @@ export async function editBill(
 }
 
 export async function getBillsDashboardData() {
-    const user = await requireCurrentUser();
-    const primaryAddress = await getPrimaryAddress();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
+            const primaryAddress = await getPrimaryAddress();
 
-    if (!primaryAddress) {
-        throw new Error("Primary address not found");
-    }
+            if (!primaryAddress) {
+                throw new Error("Primary address not found");
+            }
 
-    const [
-        billsCount,
-        stats,
-        priceStats,
-        monthlyBillsData,
-        monthlyAllBillsData,
-    ] = await Promise.all([
-        getAllBillsCount(user.id, primaryAddress.id),
-        getBillDashboardStats(user.id, primaryAddress.id),
-        getPeriodicData(user.id, primaryAddress.id),
-        getMonthlyBillsData(user.id, primaryAddress.id),
-        getAllMonthlyBillsData(user.id, primaryAddress.id),
-    ]);
+            const [
+                billsCount,
+                stats,
+                priceStats,
+                monthlyBillsData,
+                monthlyAllBillsData,
+            ] = await Promise.all([
+                getAllBillsCount(user.id, primaryAddress.id),
+                getBillDashboardStats(user.id, primaryAddress.id),
+                getPeriodicData(user.id, primaryAddress.id),
+                getMonthlyBillsData(user.id, primaryAddress.id),
+                getAllMonthlyBillsData(user.id, primaryAddress.id),
+            ]);
 
-    const hasBills = billsCount > 0;
+            const hasBills = billsCount > 0;
 
-    return {
-        hasBills,
-        stats,
-        priceStats,
-        monthlyBillsData,
-        monthlyAllBillsData,
-    };
+            return {
+                hasBills,
+                stats,
+                priceStats,
+                monthlyBillsData,
+                monthlyAllBillsData,
+            };
+        },
+        { operation: "getBillsDashboardData" },
+    );
 }
 
 export async function getDemoDashboardData() {
