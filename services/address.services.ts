@@ -24,11 +24,8 @@ export async function getAddresses() {
                 const addresses = await getAllAddresses(user.id);
                 return addresses;
             } catch (error) {
-                throw new Error(
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to fetch addresses",
-                );
+                console.error("Failed to fetch addresses", error);
+                throw new Error("Failed to fetch addresses");
             }
         },
         { operation: "getAddresses" },
@@ -39,17 +36,27 @@ export async function deleteAddress(addressId: string) {
     const user = await requireCurrentUser();
 
     if (!addressId) {
-        throw new Error("Address ID is required");
+        return {
+            success: false,
+            message: "Address ID is required",
+        };
     }
 
     try {
-        await deleteAddressById(addressId, user.id);
+        const result = await deleteAddressById(addressId, user.id);
+        if (!result.success) {
+            return result;
+        }
     } catch (error) {
-        throw new Error(
-            error instanceof Error ? error.message : "Failed to delete address",
-        );
+        console.error("Failed to delete address", error);
+        throw new Error("Failed to delete address");
     }
+
     revalidatePath("/address");
+    return {
+        success: true,
+        message: "Address deleted successfully",
+    };
 }
 
 type CreateAddressState = {
@@ -79,21 +86,19 @@ export async function createAddress(
             }
 
             try {
-                await createAddressRepo({
+                const result = await createAddressRepo({
                     ...parsedData.data,
                     userId: user.id,
                 });
+
+                if (!result.success) {
+                    return result;
+                }
             } catch (error) {
-                return {
-                    // error: "Failed to create address",
-                    // key: Date.now(),
-                    success: false,
-                    message:
-                        error instanceof Error
-                            ? error.message
-                            : "Failed to create address",
-                };
+                console.error("Failed to create address", error);
+                throw new Error("Failed to create address");
             }
+
             redirect("/address");
         },
         { operation: "createAddress" },
@@ -104,19 +109,26 @@ export async function setAddressPrimary(addressId: string) {
     const user = await requireCurrentUser();
 
     if (!addressId) {
-        throw new Error("Address ID is required");
+        return {
+            success: false,
+            message: "Address ID is required",
+        };
     }
 
     try {
-        await setAddressPrimaryRepo(addressId, user.id);
+        const result = await setAddressPrimaryRepo(addressId, user.id);
+        if (!result.success) {
+            return result;
+        }
     } catch (error) {
-        throw new Error(
-            error instanceof Error
-                ? error.message
-                : "Failed to set address as primary",
-        );
+        console.error("Failed to set address as primary", error);
+        throw new Error("Failed to set address as primary");
     }
-    redirect("/bills");
+
+    return {
+        success: true,
+        message: "Address set as primary successfully",
+    };
 }
 
 export async function findPrimaryAddress() {
@@ -126,11 +138,8 @@ export async function findPrimaryAddress() {
         const primaryAddress = await getPrimaryAddressRepo(user.id);
         return primaryAddress ?? null;
     } catch (error) {
-        throw new Error(
-            error instanceof Error
-                ? error.message
-                : "Failed to fetch primary address",
-        );
+        console.error("Failed to fetch primary address", error);
+        throw new Error("Failed to fetch primary address");
     }
 }
 

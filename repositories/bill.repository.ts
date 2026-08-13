@@ -16,12 +16,17 @@ export async function createBill(data: CreateBillData) {
         },
     });
     if (existingBill) {
-        throw new Error("Bill for this month already exists");
+        return {
+            success: false,
+            message: "Bill for this month already exists",
+        };
     }
 
     await prisma.bill.create({
         data,
     });
+
+    return { success: true, message: "Bill created successfully" };
 }
 
 export async function getAllBillsCountWithQuery(where: {
@@ -52,18 +57,35 @@ export async function getAllBillsWithQuery(
 }
 
 export async function deleteBillById(billId: string, userId: string) {
+    const existingBill = await prisma.bill.findFirst({
+        where: { id: billId, userId },
+    });
+
+    if (!existingBill) {
+        return {
+            success: false,
+            message: "Bill not found",
+        };
+    }
+
     await prisma.bill.delete({
         where: {
             id: billId,
             userId,
         },
     });
+
+    return {
+        success: true,
+        message: "Bill deleted successfully",
+    };
 }
 
-export async function getBillById(billId: string) {
-    return prisma.bill.findUnique({
+export async function getBillById(billId: string, userId: string) {
+    return prisma.bill.findFirst({
         where: {
             id: billId,
+            userId,
         },
         select: {
             id: true,
@@ -84,6 +106,7 @@ export async function getBillById(billId: string) {
 
 export async function editBill(
     billId: string,
+    userId: string,
     data: {
         total: number;
         day_consumption_kwh: number;
@@ -92,15 +115,21 @@ export async function editBill(
     },
 ) {
     const existingBill = await prisma.bill.findFirst({
-        where: { id: billId },
+        where: { id: billId, userId },
     });
+
     if (!existingBill) {
-        throw new Error("Bill not found");
+        return {
+            success: false,
+            message: "Bill not found",
+            path: "editing",
+        };
     }
 
     await prisma.bill.update({
         where: {
             id: billId,
+            userId,
         },
         data: {
             total: data.total,
@@ -109,6 +138,12 @@ export async function editBill(
             total_consumption_kwh: data.total_consumption_kwh,
         },
     });
+
+    return {
+        success: true,
+        message: "Bill updated successfully",
+        path: "editing",
+    };
 }
 
 export async function getTotalBills(userId: string, addressId: string) {

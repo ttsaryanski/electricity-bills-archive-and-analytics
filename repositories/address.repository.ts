@@ -20,20 +20,37 @@ export async function getDemoAddress() {
 }
 
 export async function deleteAddressById(addressId: string, userId: string) {
+    const address = await prisma.address.findFirst({
+        where: { id: addressId, userId },
+    });
+
+    if (!address) {
+        return {
+            success: false,
+            message: "Address not found",
+        };
+    }
+
     await prisma.address.delete({
         where: {
             id: addressId,
             userId,
         },
     });
+
+    return {
+        success: true,
+        message: "Address deleted successfully",
+    };
 }
 
 export async function createAddress(data: { address: string; userId: string }) {
     const existingAddress = await prisma.address.findFirst({
         where: { address: data.address, userId: data.userId },
     });
+
     if (existingAddress) {
-        throw new Error("Address already exists");
+        return { success: false, message: "Address already exists" };
     }
 
     const count = await prisma.address.count({
@@ -45,16 +62,36 @@ export async function createAddress(data: { address: string; userId: string }) {
             isPrimary: count === 0,
         },
     });
+
+    return { success: true, message: "Address created successfully" };
 }
 
 export async function setAddressPrimary(addressId: string, userId: string) {
-    await prisma.address.updateMany({
-        where: { userId, isPrimary: true },
-        data: { isPrimary: false },
+    const address = await prisma.address.findFirst({
+        where: { id: addressId, userId },
     });
 
-    await prisma.address.update({
-        where: { id: addressId, userId },
-        data: { isPrimary: true },
+    if (!address) {
+        return {
+            success: false,
+            message: "Address not found",
+        };
+    }
+
+    await prisma.$transaction(async (tx) => {
+        await tx.address.updateMany({
+            where: { userId, isPrimary: true },
+            data: { isPrimary: false },
+        });
+
+        await tx.address.update({
+            where: { id: addressId, userId },
+            data: { isPrimary: true },
+        });
     });
+
+    return {
+        success: true,
+        message: "Address set as primary successfully",
+    };
 }

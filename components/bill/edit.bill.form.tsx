@@ -48,11 +48,11 @@ const EditBillForm = ({
             !state.success &&
             state.path !== "total" &&
             state.path !== "day_consumption_kwh" &&
-            state.path !== "night_consumption_kwh"
+            state.path !== "night_consumption_kwh" &&
+            state.path !== "editing"
         ) {
             toast.error(state.message);
         }
-        state.success = true;
     }, [state]);
 
     return (

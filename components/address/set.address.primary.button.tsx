@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ const SetAddressPrimaryButton = ({
     onSuccess,
 }: SetAddressPrimaryButtonProps) => {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
     const handleSetPrimary = () => {
         const confirmed = confirm("Set this address as primary?");
@@ -25,19 +27,19 @@ const SetAddressPrimaryButton = ({
         startTransition(() => {
             void (async () => {
                 try {
-                    await setAddressPrimary(id);
-                    onSuccess?.();
-                } catch (error) {
-                    if (
-                        error instanceof Error &&
-                        error.message !== "NEXT_REDIRECT"
-                    ) {
-                        toast.error(
-                            error instanceof Error
-                                ? error.message
-                                : "Failed to set address as primary",
-                        );
+                    const result = await setAddressPrimary(id);
+                    if (!result.success) {
+                        toast.error(result.message);
+                        return;
                     }
+                    onSuccess?.();
+                    router.push("/bills");
+                } catch (error) {
+                    toast.error(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to set address as primary",
+                    );
                 }
             })();
         });

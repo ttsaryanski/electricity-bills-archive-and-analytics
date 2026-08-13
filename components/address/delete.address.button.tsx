@@ -26,7 +26,11 @@ const DeleteAddressButton = ({
         startTransition(() => {
             void (async () => {
                 try {
-                    await deleteAddress(id);
+                    const result = await deleteAddress(id);
+                    if (!result.success) {
+                        toast.error(result.message);
+                        return;
+                    }
                     router.refresh();
                 } catch (error) {
                     toast.error(

@@ -18,7 +18,11 @@ const DeleteButton = ({ id }: { id: string }) => {
         startTransition(() => {
             void (async () => {
                 try {
-                    await deleteBill(id);
+                    const result = await deleteBill(id);
+                    if (!result.success) {
+                        toast.error(result.message);
+                        return;
+                    }
                     router.refresh();
                 } catch (error) {
                     toast.error(

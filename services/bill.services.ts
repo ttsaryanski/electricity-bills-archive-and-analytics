@@ -49,23 +49,25 @@ export async function createBill(data: CreateBillInput) {
 
             const parsedData = createBillSchema.safeParse(data);
             if (!parsedData.success) {
-                throw new Error(parsedData.error.issues[0].message);
+                return {
+                    success: false,
+                    message: parsedData.error.issues[0].message,
+                };
             }
 
             try {
-                await createBillRepo({
+                const result = await createBillRepo({
                     ...parsedData.data,
                     userId: user.id,
                     total_consumption_kwh:
                         parsedData.data.day_consumption_kwh +
                         parsedData.data.night_consumption_kwh,
                 });
+
+                return result;
             } catch (error) {
-                throw new Error(
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to create bill",
-                );
+                console.error("Failed to create bill", error);
+                throw new Error("Failed to create bill");
             }
         },
         { operation: "createBill" },
@@ -112,10 +114,6 @@ export async function getBillsPaginated(
                 };
             }
 
-            if (!primaryAddress) {
-                throw new Error("Primary address not found");
-            }
-
             const totalCount = await getAllBillsCountWithQuery(where);
             const bills = await getAllBillsWithQuery(where, page, pageSize);
 
@@ -132,31 +130,53 @@ export async function deleteBill(billId: string) {
     const user = await requireCurrentUser();
 
     if (!billId) {
-        throw new Error("Bill ID is required");
+        return {
+            success: false,
+            message: "Bill ID is required",
+        };
     }
 
     try {
-        await deleteBillRepo(billId, user.id);
+        const result = await deleteBillRepo(billId, user.id);
+        if (!result.success) {
+            return result;
+        }
     } catch (error) {
-        throw new Error(
-            error instanceof Error ? error.message : "Failed to delete bill",
-        );
+        console.error("Failed to delete bill", error);
+        throw new Error("Failed to delete bill");
     }
+
     revalidatePath("/bills");
+    return {
+        success: true,
+        message: "Bill deleted successfully",
+    };
 }
 
 export async function getBillById(billId: string) {
+    const user = await requireCurrentUser();
+
     try {
-        const bill = await getBillByIdRepo(billId);
+        const bill = await getBillByIdRepo(billId, user.id);
         if (!bill) {
-            throw new Error("Bill not found");
+            return {
+                success: false,
+                message: "Bill not found",
+                bill: null,
+            };
         }
 
-        return { ...bill, total: Number(bill.total) };
+        return {
+            success: true,
+            message: "Bill fetched successfully",
+            bill: {
+                ...bill,
+                total: Number(bill.total),
+            },
+        };
     } catch (error) {
-        throw new Error(
-            error instanceof Error ? error.message : "Failed to fetch bill",
-        );
+        console.error("Failed to fetch bill", error);
+        throw new Error("Failed to fetch bill");
     }
 }
 
@@ -170,6 +190,8 @@ export async function editBill(
     formData: FormData,
     billId: string,
 ) {
+    const user = await requireCurrentUser();
+
     const parsedData = editBillSchema.safeParse({
         total: Number(formData.get("total")),
         day_consumption_kwh: Number(formData.get("day_consumption_kwh")),
@@ -184,20 +206,21 @@ export async function editBill(
     }
 
     try {
-        await editBillRepo(billId, {
+        const result = await editBillRepo(billId, user.id, {
             ...parsedData.data,
             total_consumption_kwh:
                 parsedData.data.day_consumption_kwh +
                 parsedData.data.night_consumption_kwh,
         });
+
+        if (!result.success) {
+            return result;
+        }
     } catch (error) {
-        return {
-            success: false,
-            message:
-                error instanceof Error ? error.message : "Failed to edit bill",
-            path: "",
-        };
+        console.error("Failed to edit bill", error);
+        throw new Error("Failed to edit bill");
     }
+
     redirect("/bills");
 }
 
@@ -241,10 +264,6 @@ export async function getBillsDashboardData() {
 
 export async function getDemoDashboardData() {
     const demoAddress = await getDemoAddress();
-
-    if (!demoAddress) {
-        throw new Error("Demo address not found");
-    }
 
     const [stats, priceStats, monthlyBillsData, monthlyAllBillsData] =
         await Promise.all([

@@ -88,7 +88,11 @@ const CreateBillForm = ({
 
         setPending(true);
         try {
-            await createBill(data);
+            const result = await createBill(data);
+            if (!result.success) {
+                toast.error(result.message || "Failed to create bill");
+                return;
+            }
             router.push("/bills");
         } catch (error) {
             toast.error(

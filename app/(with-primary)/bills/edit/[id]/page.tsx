@@ -13,7 +13,13 @@ const EditBillPage = async ({ params }: Props) => {
     let bill: BillProps | null = null;
     let message = "";
     try {
-        bill = await getBillById(id);
+        const result = await getBillById(id);
+
+        if (!result.success) {
+            message = result.message;
+        } else {
+            bill = result.bill;
+        }
     } catch (error) {
         message =
             error instanceof Error ? error.message : "Failed to fetch bill";
