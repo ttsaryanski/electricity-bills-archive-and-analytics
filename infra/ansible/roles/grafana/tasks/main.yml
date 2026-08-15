@@ -1,0 +1,135 @@
+- name: Install prerequisites for Grafana repository
+  apt:
+    name:
+      - ca-certificates
+      - gpg
+    state: present
+    update_cache: true
+
+- name: Create APT keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download Grafana repository signing key
+  get_url:
+    url: https://apt.grafana.com/gpg.key
+    dest: /etc/apt/keyrings/grafana.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure Grafana APT repository
+  deb822_repository:
+    name: grafana
+    types:
+      - deb
+    uris: https://apt.grafana.com
+    suites: stable
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/grafana.asc
+    state: present
+  register: grafana_repository
+
+- name: Update APT cache after configuring Grafana repository
+  apt:
+    update_cache: true
+  when: grafana_repository.changed
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+
+- name: Create Grafana data directory on persistent storage
+  file:
+    path: "{{ grafana_data_path }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: "0750"
+
+- name: Create Grafana dashboards directory on persistent storage
+  file:
+    path: "{{ grafana_dashboards_path }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: "0750"
+
+- name: Configure Grafana persistent data path
+  lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: "^;?data ="
+    line: "data = {{ grafana_data_path }}"
+    insertafter: "^\\[paths\\]$"
+  notify: Restart Grafana
+
+- name: Configure Grafana listen address
+  lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: "^;?http_addr ="
+    line: "http_addr = {{ grafana_listen_address }}"
+    insertafter: "^\\[server\\]$"
+  notify: Restart Grafana
+
+- name: Configure Grafana listen port
+  lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: "^;?http_port ="
+    line: "http_port = {{ grafana_port }}"
+    insertafter: "^\\[server\\]$"
+  notify: Restart Grafana
+
+- name: Create Grafana datasource provisioning directory
+  file:
+    path: /etc/grafana/provisioning/datasources
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Provision Prometheus datasource in Grafana
+  template:
+    src: prometheus.datasource.yml.j2
+    dest: /etc/grafana/provisioning/datasources/prometheus.yml
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Create Grafana dashboard provisioning directory
+  file:
+    path: /etc/grafana/provisioning/dashboards
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Provision PowerTrack dashboard provider
+  template:
+    src: powertrack.dashboards.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/powertrack.yml
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Copy PowerTrack dashboard definition
+  copy:
+    src: dashboards/powertrack-overview.json
+    dest: "{{ grafana_dashboards_path }}/powertrack-overview.json"
+    owner: grafana
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Ensure Grafana service is enabled and running
+  systemd:
+    name: grafana-server
+    enabled: true
+    state: started

@@ -25,3 +25,11 @@ prometheus_listen_address: "0.0.0.0:9090"
 prometheus_allowed_ip: "127.0.0.1"
 prometheus_data_device: "/dev/disk/azure/scsi1/lun10"
 prometheus_storage_path: "/var/lib/prometheus"
+
+# Grafana
+grafana_listen_address: "127.0.0.1"
+grafana_port: 3003
+grafana_data_path: "{{ prometheus_storage_path }}/grafana"
+grafana_dashboards_path: "{{ grafana_data_path }}/dashboards"
+grafana_prometheus_url: "http://127.0.0.1:9090"
+grafana_prometheus_uid: "prometheus"
