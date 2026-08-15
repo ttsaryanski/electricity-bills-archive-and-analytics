@@ -22,6 +22,11 @@
     group: root
     mode: "0644"
 
+- name: Remove legacy Grafana APT source from manual installation
+  file:
+    path: /etc/apt/sources.list.d/grafana.list
+    state: absent
+
 - name: Configure Grafana APT repository
   deb822_repository:
     name: grafana
