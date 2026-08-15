@@ -1,0 +1,76 @@
+- name: Resolve slot deployment variables
+  set_fact:
+    deployed_container_name: "{{ app_slot_name | default(app_name_base) }}"
+    deployed_app_port: "{{ app_slot_port | default(app_port) }}"
+    deployed_image: "{{ image_repository }}:{{ image_tag }}"
+
+- name: Ensure env directory exists
+  file:
+    path: "{{ docker_env_base_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Place environment file for this slot
+  template:
+    src: powertrack.env.j2
+    dest: "{{ docker_env_base_dir }}/{{ deployed_container_name }}.env"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Pull application image
+  command: docker pull {{ deployed_image }}
+  changed_when: true
+
+- name: Run database migrations using the new image
+  command: >
+    docker run --rm --env-file {{ docker_env_base_dir }}/{{ deployed_container_name }}.env
+    {{ deployed_image }} npx prisma migrate deploy
+  changed_when: true
+
+- name: Remove existing container for this slot, if any
+  command: docker rm -f {{ deployed_container_name }}
+  register: remove_result
+  failed_when: false
+  changed_when: remove_result.rc == 0
+
+- name: Start application container for this slot
+  command: >
+    docker run -d
+    --name {{ deployed_container_name }}
+    --restart unless-stopped
+    -p {{ deployed_app_port }}:3000
+    --env-file {{ docker_env_base_dir }}/{{ deployed_container_name }}.env
+    {{ deployed_image }}
+  changed_when: true
+
+- name: Wait for slot app port to be reachable
+  wait_for:
+    host: 127.0.0.1
+    port: "{{ deployed_app_port | int }}"
+    state: started
+    delay: 2
+    timeout: 90
+
+- name: Verify container is running
+  command: docker inspect -f "{{ '{{.State.Running}}' }}" {{ deployed_container_name }}
+  register: container_state
+  changed_when: false
+  failed_when: container_state.stdout != "true"
+
+- name: Wait for slot app HTTP response
+  uri:
+    url: "http://127.0.0.1:{{ deployed_app_port }}/"
+    method: GET
+    status_code:
+      - 200
+      - 301
+      - 302
+      - 307
+      - 308
+  register: app_healthcheck
+  retries: 20
+  delay: 3
+  until: app_healthcheck.status in [200, 301, 302, 307, 308]

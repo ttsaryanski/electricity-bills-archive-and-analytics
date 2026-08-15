@@ -33,3 +33,8 @@ grafana_data_path: "{{ prometheus_storage_path }}/grafana"
 grafana_dashboards_path: "{{ grafana_data_path }}/dashboards"
 grafana_prometheus_url: "http://127.0.0.1:9090"
 grafana_prometheus_uid: "prometheus"
+
+# Docker-based blue/green deployment
+image_repository: ghcr.io/ttsaryanski/electricity-bills-archive-and-analytics
+image_tag: latest
+docker_env_base_dir: /var/www/powertrack-env

@@ -1,0 +1,41 @@
+- name: Install prerequisite packages
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+
+- name: Add Docker APT repository (deb822 format)
+  deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: "{{ ansible_architecture | regex_replace('x86_64', 'amd64') }}"
+    signed_by: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Install Docker Engine
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Ensure Docker service is running and enabled
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add ansible_user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true

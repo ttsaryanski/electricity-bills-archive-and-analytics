@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+infra
+pdf_extractor
+screenshots
+*.md
+.env
+.env.example
