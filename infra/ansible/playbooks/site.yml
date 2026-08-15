@@ -8,6 +8,11 @@
     - grafana
 
   pre_tasks:
+    - name: Remove legacy Grafana APT source before package operations
+      file:
+        path: /etc/apt/sources.list.d/grafana.list
+        state: absent
+        
     - name: Read current active deployment color marker
       stat:
         path: "{{ active_color_file }}"
