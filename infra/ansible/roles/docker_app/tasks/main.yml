@@ -3,6 +3,7 @@
     deployed_container_name: "{{ app_slot_name | default(app_name_base) }}"
     deployed_app_port: "{{ app_slot_port | default(app_port) }}"
     deployed_image: "{{ image_repository }}:{{ image_tag }}"
+    deployed_migrator_image: "{{ image_repository }}:migrator-{{ image_tag }}"
 
 - name: Ensure env directory exists
   file:
@@ -24,10 +25,14 @@
   command: docker pull {{ deployed_image }}
   changed_when: true
 
-- name: Run database migrations using the new image
+- name: Pull migrator image
+  command: docker pull {{ deployed_migrator_image }}
+  changed_when: true
+
+- name: Run database migrations using the migrator image
   command: >
     docker run --rm --env-file {{ docker_env_base_dir }}/{{ deployed_container_name }}.env
-    {{ deployed_image }} npx prisma migrate deploy
+    {{ deployed_migrator_image }} npx prisma migrate deploy
   changed_when: true
 
 - name: Remove existing container for this slot, if any
