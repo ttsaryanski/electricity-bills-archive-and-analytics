@@ -13,7 +13,6 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
     BarChart3,
-    Package,
     Plus,
     Bolt,
     UserLock,

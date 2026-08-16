@@ -17,7 +17,7 @@ const SearchBillForm = ({
         if (error && !isYearError) {
             toast.error(error);
         }
-    }, [error]);
+    }, [error, isYearError]);
 
     return (
         <>

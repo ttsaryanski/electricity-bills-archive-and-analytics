@@ -32,7 +32,7 @@ export async function getBillDashboardStats(userId: string, addressId: string) {
                 ? [...sortedBills.slice(0, 1), ...sortedBills.slice(-1)]
                 : sortedBills;
 
-    let {
+    const {
         billsForLastMonthCount,
         isUp,
         growthPercentage,
@@ -50,7 +50,7 @@ export async function getBillDashboardStats(userId: string, addressId: string) {
         lastConsumption,
     } = metricsForBills(bills);
 
-    let {
+    const {
         isPriceUp,
         lastDayPrice,
         lastNightPrice,
@@ -112,7 +112,7 @@ export async function getDemoDashboardStats(addressId: string) {
                 ? [...sortedBills.slice(0, 1), ...sortedBills.slice(-1)]
                 : sortedBills;
 
-    let {
+    const {
         billsForLastMonthCount,
         isUp,
         growthPercentage,
@@ -130,7 +130,7 @@ export async function getDemoDashboardStats(addressId: string) {
         lastConsumption,
     } = metricsForBills(bills);
 
-    let {
+    const {
         isPriceUp,
         lastDayPrice,
         lastNightPrice,

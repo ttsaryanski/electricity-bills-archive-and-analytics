@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -17,11 +17,15 @@ const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
 });
 
 const CreateBillFileView = ({ file }: { file: File | null }) => {
-    const [url, setUrl] = useState<string | null>(null);
     const [pdfReady, setPdfReady] = useState(false);
 
     const [width, setWidth] = useState(0);
     const containerRef = useRef<HTMLDivElement | null>(null);
+
+    const url = useMemo(
+        () => (file ? URL.createObjectURL(file) : null),
+        [file],
+    );
 
     useEffect(() => {
         let mounted = true;
@@ -43,14 +47,12 @@ const CreateBillFileView = ({ file }: { file: File | null }) => {
     }, []);
 
     useEffect(() => {
-        if (!file) {
-            setUrl(null);
-            return;
-        }
-        const objectUrl = URL.createObjectURL(file);
-        setUrl(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [file]);
+        return () => {
+            if (url) {
+                URL.revokeObjectURL(url);
+            }
+        };
+    }, [url]);
 
     useEffect(() => {
         if (!url || !containerRef.current) {

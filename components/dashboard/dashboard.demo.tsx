@@ -18,6 +18,7 @@ const DashboardDemo = async () => {
     try {
         address = await getDemoAddress();
     } catch (error) {
+        console.error("Error fetching demo address:", error);
         return <AddressFallBack />;
     }
 

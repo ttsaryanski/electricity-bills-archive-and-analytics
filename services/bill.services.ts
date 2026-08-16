@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getDemoAddress, getPrimaryAddress } from "@/services/address.services";
 
 import { trackOperation } from "@/lib/observability/track.operation";
+import { powertrackBillsCreatedTotal } from "@/lib/observability/metrics";
 import { requireCurrentUser } from "@/lib/auth";
 // import { checkBillRateLimit } from "@/lib/bill/bill.rate-limit";
 import {
@@ -63,6 +64,10 @@ export async function createBill(data: CreateBillInput) {
                         parsedData.data.day_consumption_kwh +
                         parsedData.data.night_consumption_kwh,
                 });
+
+                if (result.success) {
+                    powertrackBillsCreatedTotal.inc();
+                }
 
                 return result;
             } catch (error) {
@@ -263,20 +268,25 @@ export async function getBillsDashboardData() {
 }
 
 export async function getDemoDashboardData() {
-    const demoAddress = await getDemoAddress();
+    return trackOperation(
+        async () => {
+            const demoAddress = await getDemoAddress();
 
-    const [stats, priceStats, monthlyBillsData, monthlyAllBillsData] =
-        await Promise.all([
-            getDemoDashboardStats(demoAddress.id),
-            getDemoPeriodicData(demoAddress.id),
-            getDemoMonthlyBillsData(demoAddress.id),
-            getDemoAllMonthlyBillsData(demoAddress.id),
-        ]);
+            const [stats, priceStats, monthlyBillsData, monthlyAllBillsData] =
+                await Promise.all([
+                    getDemoDashboardStats(demoAddress.id),
+                    getDemoPeriodicData(demoAddress.id),
+                    getDemoMonthlyBillsData(demoAddress.id),
+                    getDemoAllMonthlyBillsData(demoAddress.id),
+                ]);
 
-    return {
-        stats,
-        priceStats,
-        monthlyBillsData,
-        monthlyAllBillsData,
-    };
+            return {
+                stats,
+                priceStats,
+                monthlyBillsData,
+                monthlyAllBillsData,
+            };
+        },
+        { operation: "getDemoDashboardData" },
+    );
 }

@@ -206,7 +206,7 @@ export async function getPeriodicData(
         return { status: "no-data", data: [] };
     }
 
-    const result: AnalyticsPeriod[] = periodData.map((curr, i) => {
+    const result: AnalyticsPeriod[] = periodData.map((curr) => {
         let priceChangePct: number | null = null;
         let consumptionChangePct: number | null = null;
         let billChangePct: number | null = null;
@@ -410,7 +410,7 @@ export async function getDemoPeriodicData(
         return { status: "no-data", data: [] };
     }
 
-    const result: AnalyticsPeriod[] = periodData.map((curr, i) => {
+    const result: AnalyticsPeriod[] = periodData.map((curr) => {
         let priceChangePct: number | null = null;
         let consumptionChangePct: number | null = null;
         let billChangePct: number | null = null;

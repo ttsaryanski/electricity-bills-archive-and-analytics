@@ -3,6 +3,7 @@ import client from "prom-client";
 type MetricsGlobal = {
     prometheusRegister?: client.Registry;
     prometheusInitialized?: boolean;
+    powertrackBillsCreatedTotal?: client.Counter<string>;
 };
 
 const globalForMetrics = globalThis as unknown as MetricsGlobal;
@@ -111,3 +112,12 @@ export const powertrack_in_flight_requests = getOrCreateGauge(
     "Number of tracked PowerTrack operations currently in flight",
     ["method", "route"],
 );
+
+export const powertrackBillsCreatedTotal =
+    globalForMetrics.powertrackBillsCreatedTotal ??
+    new client.Counter({
+        name: "powertrack_bills_created_total",
+        help: "Total number of bills created successfully",
+        registers: [register],
+    });
+globalForMetrics.powertrackBillsCreatedTotal = powertrackBillsCreatedTotal;

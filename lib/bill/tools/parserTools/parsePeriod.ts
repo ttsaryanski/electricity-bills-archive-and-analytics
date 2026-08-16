@@ -6,7 +6,7 @@ export function parsePeriod(
     const dateRegex = /\d{1,2}\.\d{1,2}\.\d{4}/;
 
     let candidate: { month: string; year: string } | null = null;
-    let dateTokensArr: string[] = [];
+    const dateTokensArr: string[] = [];
 
     for (const row of rows) {
         const tokens = row.tokens;

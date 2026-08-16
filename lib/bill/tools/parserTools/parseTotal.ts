@@ -3,7 +3,7 @@ import type { TokenRow } from "./buildTokens";
 export function parseTotal(rows: TokenRow[]): number | null {
     const moneyRegex = /^\d+(\.\d{1,2})$/;
 
-    let prices: number[] = [];
+    const prices: number[] = [];
     let candidate: number | null = null;
 
     for (const row of rows) {

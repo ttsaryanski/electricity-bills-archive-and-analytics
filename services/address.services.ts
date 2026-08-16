@@ -106,29 +106,34 @@ export async function createAddress(
 }
 
 export async function setAddressPrimary(addressId: string) {
-    const user = await requireCurrentUser();
+    return trackOperation(
+        async () => {
+            const user = await requireCurrentUser();
 
-    if (!addressId) {
-        return {
-            success: false,
-            message: "Address ID is required",
-        };
-    }
+            if (!addressId) {
+                return {
+                    success: false,
+                    message: "Address ID is required",
+                };
+            }
 
-    try {
-        const result = await setAddressPrimaryRepo(addressId, user.id);
-        if (!result.success) {
-            return result;
-        }
-    } catch (error) {
-        console.error("Failed to set address as primary", error);
-        throw new Error("Failed to set address as primary");
-    }
+            try {
+                const result = await setAddressPrimaryRepo(addressId, user.id);
+                if (!result.success) {
+                    return result;
+                }
+            } catch (error) {
+                console.error("Failed to set address as primary", error);
+                throw new Error("Failed to set address as primary");
+            }
 
-    return {
-        success: true,
-        message: "Address set as primary successfully",
-    };
+            return {
+                success: true,
+                message: "Address set as primary successfully",
+            };
+        },
+        { operation: "setAddressPrimary" },
+    );
 }
 
 export async function findPrimaryAddress() {
@@ -144,13 +149,18 @@ export async function findPrimaryAddress() {
 }
 
 export async function getPrimaryAddress() {
-    const primaryAddress = await findPrimaryAddress();
+    return trackOperation(
+        async () => {
+            const primaryAddress = await findPrimaryAddress();
 
-    if (!primaryAddress) {
-        throw new Error("No primary address found");
-    }
+            if (!primaryAddress) {
+                throw new Error("No primary address found");
+            }
 
-    return primaryAddress;
+            return primaryAddress;
+        },
+        { operation: "getPrimaryAddress" },
+    );
 }
 
 export async function getDemoAddress() {

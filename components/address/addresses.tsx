@@ -23,11 +23,13 @@ const AddressesPage = ({
     error: string;
 }) => {
     const [rows, setRows] = useState(addresses);
+    const [prevAddresses, setPrevAddresses] = useState(addresses);
     const singleAddress = rows.length === 1;
 
-    useEffect(() => {
+    if (addresses !== prevAddresses) {
+        setPrevAddresses(addresses);
         setRows(addresses);
-    }, [addresses]);
+    }
 
     useEffect(() => {
         if (error) {

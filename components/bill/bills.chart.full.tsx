@@ -5,8 +5,6 @@ import { Euro } from "lucide-react";
 import {
     Line,
     LineChart,
-    Area,
-    AreaChart,
     CartesianGrid,
     ResponsiveContainer,
     Tooltip,
