@@ -38,3 +38,7 @@ grafana_prometheus_uid: "prometheus"
 image_repository: ghcr.io/ttsaryanski/electricity-bills-archive-and-analytics
 image_tag: latest
 docker_env_base_dir: /var/www/powertrack-env
+
+# node_exporter
+node_exporter_listen_address: "127.0.0.1:9100"
+node_exporter_target: "127.0.0.1:9100"

@@ -1,0 +1,18 @@
+- name: Install node_exporter
+  apt:
+    name: prometheus-node-exporter
+    state: present
+    update_cache: true
+
+- name: Configure node_exporter listen address
+  lineinfile:
+    path: /etc/default/prometheus-node-exporter
+    regexp: "^ARGS="
+    line: 'ARGS="--web.listen-address={{ node_exporter_listen_address }}"'
+  notify: Restart node_exporter
+
+- name: Ensure node_exporter service is enabled and running
+  systemd:
+    name: prometheus-node-exporter
+    enabled: true
+    state: started

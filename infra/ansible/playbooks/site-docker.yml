@@ -4,6 +4,7 @@
   roles:
     - common
     - docker
+    - node_exporter
     - prometheus
     - grafana
 
