@@ -4,6 +4,11 @@ type MetricsGlobal = {
     prometheusRegister?: client.Registry;
     prometheusInitialized?: boolean;
     powertrackBillsCreatedTotal?: client.Counter<string>;
+    powertrackBillsDeletedTotal?: client.Counter<string>;
+    powertrackBillsValidationTotal?: client.Counter<string>;
+    powertrackAddressCreatedTotal?: client.Counter<string>;
+    powertrackAddressDeletedTotal?: client.Counter<string>;
+    powertrackAddressValidationTotal?: client.Counter<string>;
 };
 
 const globalForMetrics = globalThis as unknown as MetricsGlobal;
@@ -121,3 +126,50 @@ export const powertrackBillsCreatedTotal =
         registers: [register],
     });
 globalForMetrics.powertrackBillsCreatedTotal = powertrackBillsCreatedTotal;
+
+export const powertrackBillsDeletedTotal =
+    globalForMetrics.powertrackBillsDeletedTotal ??
+    new client.Counter({
+        name: "powertrack_bills_deleted_total",
+        help: "Total number of bills deleted successfully",
+        registers: [register],
+    });
+globalForMetrics.powertrackBillsDeletedTotal = powertrackBillsDeletedTotal;
+
+export const powertrackBillsValidationTotal =
+    globalForMetrics.powertrackBillsValidationTotal ??
+    new client.Counter({
+        name: "powertrack_bills_validation_total",
+        help: "Total number of bills validation errors",
+        registers: [register],
+    });
+globalForMetrics.powertrackBillsValidationTotal =
+    powertrackBillsValidationTotal;
+
+export const powertrackAddressCreatedTotal =
+    globalForMetrics.powertrackAddressCreatedTotal ??
+    new client.Counter({
+        name: "powertrack_address_created_total",
+        help: "Total number of addresses created successfully",
+        registers: [register],
+    });
+globalForMetrics.powertrackAddressCreatedTotal = powertrackAddressCreatedTotal;
+
+export const powertrackAddressDeletedTotal =
+    globalForMetrics.powertrackAddressDeletedTotal ??
+    new client.Counter({
+        name: "powertrack_address_deleted_total",
+        help: "Total number of addresses deleted successfully",
+        registers: [register],
+    });
+globalForMetrics.powertrackAddressDeletedTotal = powertrackAddressDeletedTotal;
+
+export const powertrackAddressValidationTotal =
+    globalForMetrics.powertrackAddressValidationTotal ??
+    new client.Counter({
+        name: "powertrack_address_validation_total",
+        help: "Total number of addresses validation errors",
+        registers: [register],
+    });
+globalForMetrics.powertrackAddressValidationTotal =
+    powertrackAddressValidationTotal;

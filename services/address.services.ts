@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { trackOperation } from "@/lib/observability/track.operation";
+import {
+    powertrackAddressCreatedTotal,
+    powertrackAddressDeletedTotal,
+    powertrackAddressValidationTotal,
+} from "@/lib/observability/metrics";
 import { requireCurrentUser } from "@/lib/auth";
 import { createAddressSchema } from "@/validators/address.schema";
 import {
@@ -47,6 +52,7 @@ export async function deleteAddress(addressId: string) {
         if (!result.success) {
             return result;
         }
+        powertrackAddressDeletedTotal.inc();
     } catch (error) {
         console.error("Failed to delete address", error);
         throw new Error("Failed to delete address");
@@ -84,6 +90,7 @@ export async function createAddress(
                     message: parsedData.error.issues[0].message,
                 };
             }
+            powertrackAddressValidationTotal.inc();
 
             try {
                 const result = await createAddressRepo({
@@ -94,6 +101,7 @@ export async function createAddress(
                 if (!result.success) {
                     return result;
                 }
+                powertrackAddressCreatedTotal.inc();
             } catch (error) {
                 console.error("Failed to create address", error);
                 throw new Error("Failed to create address");

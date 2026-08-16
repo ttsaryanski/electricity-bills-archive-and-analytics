@@ -6,7 +6,11 @@ import { revalidatePath } from "next/cache";
 import { getDemoAddress, getPrimaryAddress } from "@/services/address.services";
 
 import { trackOperation } from "@/lib/observability/track.operation";
-import { powertrackBillsCreatedTotal } from "@/lib/observability/metrics";
+import {
+    powertrackBillsCreatedTotal,
+    powertrackBillsDeletedTotal,
+    powertrackBillsValidationTotal,
+} from "@/lib/observability/metrics";
 import { requireCurrentUser } from "@/lib/auth";
 // import { checkBillRateLimit } from "@/lib/bill/bill.rate-limit";
 import {
@@ -55,6 +59,7 @@ export async function createBill(data: CreateBillInput) {
                     message: parsedData.error.issues[0].message,
                 };
             }
+            powertrackBillsValidationTotal.inc();
 
             try {
                 const result = await createBillRepo({
@@ -146,6 +151,7 @@ export async function deleteBill(billId: string) {
         if (!result.success) {
             return result;
         }
+        powertrackBillsDeletedTotal.inc();
     } catch (error) {
         console.error("Failed to delete bill", error);
         throw new Error("Failed to delete bill");
