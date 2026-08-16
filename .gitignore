@@ -61,4 +61,5 @@ terraform.tfvars
 helper.md
 metrics.md
 manifest.json
+Grafana-Dashboard.json
 
