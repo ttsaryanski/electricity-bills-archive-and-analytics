@@ -62,4 +62,5 @@ helper.md
 metrics.md
 manifest.json
 Grafana-Dashboard.json
-
+Grafana-Dashboard-Classic.json
+/grafana-templates
