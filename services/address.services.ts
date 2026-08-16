@@ -83,6 +83,7 @@ export async function createAddress(
                 address: formData.get("address"),
             });
             if (!parsedData.success) {
+                powertrackAddressValidationTotal.inc();
                 return {
                     // error: parsedData.error.issues[0].message,
                     // key: Date.now(),
@@ -90,7 +91,6 @@ export async function createAddress(
                     message: parsedData.error.issues[0].message,
                 };
             }
-            powertrackAddressValidationTotal.inc();
 
             try {
                 const result = await createAddressRepo({

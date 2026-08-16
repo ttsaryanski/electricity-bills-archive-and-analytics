@@ -54,12 +54,12 @@ export async function createBill(data: CreateBillInput) {
 
             const parsedData = createBillSchema.safeParse(data);
             if (!parsedData.success) {
+                powertrackBillsValidationTotal.inc();
                 return {
                     success: false,
                     message: parsedData.error.issues[0].message,
                 };
             }
-            powertrackBillsValidationTotal.inc();
 
             try {
                 const result = await createBillRepo({
