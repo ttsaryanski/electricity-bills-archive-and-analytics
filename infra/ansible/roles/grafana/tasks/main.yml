@@ -133,6 +133,15 @@
     mode: "0640"
   notify: Restart Grafana
 
+- name: Copy PowerTrack infra dashboard definition
+  copy:
+    src: dashboards/powertrack-infra.json
+    dest: "{{ grafana_dashboards_path }}/powertrack-infra.json"
+    owner: grafana
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
 - name: Ensure Grafana service is enabled and running
   systemd:
     name: grafana-server
