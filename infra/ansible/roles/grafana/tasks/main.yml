@@ -124,19 +124,10 @@
     mode: "0640"
   notify: Restart Grafana
 
-- name: Copy PowerTrack dashboard definition
+- name: Copy all PowerTrack dashboard definition
   copy:
-    src: dashboards/powertrack-overview.json
-    dest: "{{ grafana_dashboards_path }}/powertrack-overview.json"
-    owner: grafana
-    group: grafana
-    mode: "0640"
-  notify: Restart Grafana
-
-- name: Copy PowerTrack infra dashboard definition
-  copy:
-    src: dashboards/powertrack-infra.json
-    dest: "{{ grafana_dashboards_path }}/powertrack-infra.json"
+    src: dashboards/
+    dest: "{{ grafana_dashboards_path }}/"
     owner: grafana
     group: grafana
     mode: "0640"
