@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
-import { Prisma } from "@prisma/client";
 
-import { prisma } from "@/lib/prisma";
+import { syncUser } from "@/services/user.services";
 
 export type AuthUser = NonNullable<Awaited<ReturnType<typeof currentUser>>>;
 
@@ -19,26 +18,7 @@ function getUserEmail(user: Awaited<ReturnType<typeof currentUser>>) {
 }
 
 async function syncAuthenticatedUser(userId: string, email: string) {
-    try {
-        await prisma.user.upsert({
-            where: { id: userId },
-            update: { email },
-            create: { id: userId, email },
-        });
-    } catch (error) {
-        if (
-            error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2002"
-        ) {
-            await prisma.user.update({
-                where: { email },
-                data: { id: userId },
-            });
-            return;
-        }
-
-        throw error;
-    }
+    await syncUser(userId, email);
 }
 
 export async function getCurrentUser() {
