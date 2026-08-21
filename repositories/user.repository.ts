@@ -18,3 +18,8 @@ export async function updateUserRepo(userId: string, email: string) {
 
     return { success: true, message: "User updated successfully" };
 }
+
+export async function getUsersCount() {
+    const count = await prisma.user.count();
+    return count;
+}
