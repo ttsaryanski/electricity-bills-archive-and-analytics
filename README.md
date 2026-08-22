@@ -1,6 +1,6 @@
 # Electricity Bills Archive and Analytics
 
-Live app: http://powertrack.duckdns.org
+Live app: https://powertrack.duckdns.org
 
 Full-stack web application for storing electricity bills, managing addresses, and analyzing payment and consumption trends over time.
 
@@ -238,6 +238,193 @@ Current protected areas include:
 - /bills
 - /add-bill
 - /address
+
+---
+
+# Deployment and Infrastructure
+
+All deployment and infrastructure code lives in the `infra/` directory. The live environment runs on a single Azure Linux VM with Nginx, PostgreSQL (external), and observability stack on the same host.
+
+## Context and Evolution
+
+This is an educational project, so the infrastructure intentionally uses the cheapest viable Azure VM size (`Standard_B2ats_v2` by default in Terraform). That kept costs low while learning provisioning, configuration management, and release automation.
+
+The first deployment model built the application directly on the VM:
+
+- Git checkout on the server
+- `npm ci`, Prisma generate/migrate, and `npm run build` on the VM
+- PM2 process manager for the Next.js app
+
+That workflow is preserved in `infra/ansible/playbooks/site.yml` and the `app` role for historical reference.
+
+After adding Prometheus and Grafana for metrics, the VM hit a critical resource limit. RAM became insufficient for Node.js build, the app, Nginx, Prometheus, and Grafana at the same time. Swap helped only partially, and redeploy time grew to about **1.5 hours** per release.
+
+The current model moves build work off the VM:
+
+- GitHub Actions builds Docker images in CI (app + migrator)
+- Images are pushed to GitHub Container Registry (GHCR)
+- The VM only pulls pre-built images and runs containers
+
+Ansible deploys via `infra/ansible/playbooks/site-docker.yml` and the `docker_app` role. The legacy Node/PM2 path remains in the repo so the infrastructure evolution can be traced over time.
+
+## High-Level Architecture
+
+```text
+GitHub Actions (build + push image)
+        |
+        v
+   GHCR (app + migrator images)
+        |
+        v
+Azure VM (Ubuntu 24.04)
+  ├── Nginx (reverse proxy, TLS, /healthz, /metrics)
+  ├── Docker: blue/green app slots (ports 3001 / 3002)
+  ├── Prometheus (dedicated Azure data disk)
+  ├── Grafana (localhost only)
+  └── node_exporter (host metrics)
+        |
+        v
+External PostgreSQL database
+```
+
+## `infra/` Layout
+
+```text
+infra/
+├── terraform/                 # Azure resource provisioning
+│   ├── main.tf                # RG, VNet, NSG, VM, public IP, Prometheus disk
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── terraform.tfvars.example
+└── ansible/                   # Server configuration and deployment
+    ├── playbooks/
+    │   ├── site-docker.yml    # Current Docker-based blue/green deploy
+    │   └── site.yml           # Legacy Node.js + PM2 deploy (historical)
+    ├── group_vars/all/        # Shared variables and encrypted secrets (vault)
+    ├── inventory.ini
+    └── roles/
+        ├── common             # Base packages, swap, Nginx/Certbot prerequisites
+        ├── docker             # Docker engine setup
+        ├── docker_app         # Pull image, run migrations, start container slot
+        ├── app                # Legacy git checkout + npm build + PM2 (historical)
+        ├── node               # Legacy Node.js + PM2 setup (historical)
+        ├── nginx              # Reverse proxy, TLS, active slot routing
+        ├── prometheus         # Prometheus install + persistent TSDB disk mount
+        ├── grafana            # Grafana install + datasource/dashboard provisioning
+        └── node_exporter      # Host-level metrics exporter
+```
+
+## Azure Infrastructure (Terraform)
+
+Terraform provisions:
+
+- Resource group, virtual network, subnet, and network security group
+- Public IP with DuckDNS-friendly domain label (`powertrack.duckdns.org`)
+- Single Linux VM (Ubuntu 24.04 LTS, SSH key auth)
+- Dedicated managed disk for Prometheus TSDB data (mounted at `/var/lib/prometheus`)
+
+NSG inbound rules allow SSH (restricted to a configured IP), HTTP, and HTTPS.
+
+Example bootstrap:
+
+```bash
+cd infra/terraform
+cp terraform.tfvars.example terraform.tfvars
+# edit terraform.tfvars with your Azure values
+terraform init
+terraform apply
+```
+
+## Ansible Deployment
+
+The active playbook is `site-docker.yml`. It performs a blue/green rollout:
+
+1. Deploy the new app version to the inactive slot (blue on port 3001 or green on port 3002)
+2. Run Prisma migrations via a dedicated migrator image
+3. Smoke-test the inactive slot locally
+4. Switch Nginx traffic to the new slot
+5. Roll back automatically if health checks fail
+
+Shared deployment settings are in `infra/ansible/group_vars/all/all.yml` (domain, ports, image repository, Prometheus/Grafana paths). Sensitive values are stored in Ansible Vault (`vault.yml`).
+
+Manual deploy example:
+
+```bash
+cd infra/ansible
+ansible-playbook -i inventory.ini playbooks/site-docker.yml \
+  --vault-password-file ~/.ansible_vault_pass \
+  --extra-vars "image_tag=latest forced_target_color=auto"
+```
+
+## CI/CD
+
+Production deploys are automated by `.github/workflows/build_and_deploy.yml`:
+
+1. On push to `main` (or manual workflow dispatch), build and push:
+    - `ghcr.io/<repo>:<sha>` and `:latest` (application image)
+    - `ghcr.io/<repo>:migrator-<sha>` (migration runner image)
+2. Run Ansible `site-docker.yml` against the Azure VM over SSH
+
+This keeps heavy build steps (`npm ci`, Prisma generate, Next.js build) in GitHub runners instead of on the small VM.
+
+## Metrics and Observability
+
+Observability was added after the initial deployment and became the main driver for moving to Docker.
+
+### Prometheus
+
+- Installed on the VM via Ansible
+- Stores metrics on a dedicated Azure managed disk (default 64 GB, 15-day retention)
+- Scrapes:
+    - itself (`127.0.0.1:9090`)
+    - the PowerTrack app through Nginx at `/metrics` (localhost-only access enforced by Nginx)
+    - `node_exporter` for host CPU, memory, disk, and network metrics
+
+### Application Metrics
+
+The app exposes Prometheus metrics at `/metrics` (`app/metrics/route.ts`, `lib/observability/metrics.ts`) using `prom-client`:
+
+- Default Node.js process metrics
+- Request counters, duration histograms, in-flight gauge, and error counters
+- Business counters for bills and addresses (create/delete/validation)
+- Registered users gauge
+
+### Grafana
+
+- Installed on the VM and bound to `127.0.0.1:3003` (not exposed publicly)
+- Prometheus datasource and dashboards are provisioned automatically from Ansible
+- Predefined dashboards in `infra/ansible/roles/grafana/files/dashboards/`:
+    - `powertrack-app.json` — application health and request metrics
+    - `powertrack-business.json` — bill/address activity and user counts
+    - `powertrack-infra.json` — VM and host resource usage
+
+Access Grafana locally via SSH tunnel:
+
+```bash
+ssh -L 3003:127.0.0.1:3003 <user>@<vm-public-ip>
+```
+
+Then open http://localhost:3003
+
+### node_exporter
+
+Host metrics are collected by `prometheus-node-exporter`, listening on `127.0.0.1:9100` and scraped by Prometheus.
+
+---
+
+### Screenshots
+
+#### Azure
+
+![Azure resource group overview](screenshots/infra/azure-resource-group.jpg)
+
+#### Grafana Dashboards
+
+![Grafana app dashboard](screenshots/infra/grafana-app-dashboard.jpg)
+
+![Grafana business dashboard](screenshots/infra/grafana-business-dashboard.jpg)
+
+![Grafana infrastructure dashboard](screenshots/infra/grafana-infra-dashboard.jpg)
 
 ## Status
 

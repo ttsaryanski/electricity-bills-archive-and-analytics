@@ -6,7 +6,7 @@ import { parseTotal } from "@/lib/bill/tools/parserTools/parseTotal";
 import { parsePeriod } from "@/lib/bill/tools/parserTools/parsePeriod";
 
 type ParsedBillFileResult = {
-    parsedPeriod: { month: string; year: string }; // | null;
+    parsedPeriod: { month: string; year: string };
     parsedDayCons: string;
     parsedNightCons: string;
     parsedTotal: string;
