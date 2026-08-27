@@ -1,0 +1,10 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: Discord
+    receivers:
+      - uid: discord
+        type: discord
+        settings:
+          url: "{{ grafana_discord_webhook_url }}"

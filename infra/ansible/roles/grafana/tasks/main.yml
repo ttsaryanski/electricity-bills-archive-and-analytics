@@ -133,6 +133,32 @@
     mode: "0640"
   notify: Restart Grafana
 
+- name: Create Grafana alerting provisioning directory
+  file:
+    path: /etc/grafana/provisioning/alerting
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Provision Grafana Discord contact point
+  template:
+    src: grafana.contact-points.yml.j2
+    dest: /etc/grafana/provisioning/alerting/contact-points.yml
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Provision PowerTrack alert rules
+  copy:
+    src: alerting/powertrack-alerting.json
+    dest: /etc/grafana/provisioning/alerting/powertrack-alerting.json
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
 - name: Ensure Grafana service is enabled and running
   systemd:
     name: grafana-server

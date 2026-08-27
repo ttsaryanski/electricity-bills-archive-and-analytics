@@ -28,7 +28,7 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "continuous-greens"
+                        "mode": "thresholds"
                     },
                     "thresholds": {
                         "mode": "absolute",
