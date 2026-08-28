@@ -22,7 +22,7 @@ The application is built with Next.js App Router, Prisma, PostgreSQL, Clerk auth
 - Per-user isolated data model
 - Address management with a required primary address
 - Bill CRUD with validation and duplicate prevention (unique user+address+month+year)
-- In-app bill data extraction from uploaded PDF files (auto-fill day/night consumption and total amount)
+- In-app bill data extraction from uploaded PDF files (auto-fill period, day/night consumption and total amount)
 - Paginated bill listing with year filtering
 - Dashboard with:
     - Last-month metrics and trend deltas
@@ -206,6 +206,8 @@ python extract_energo_pro_euro.py
 The Add Bill form supports direct PDF upload and attempts to auto-populate:
 (only for ENERGO PRO Bulgaria customers for now)
 
+- Month
+- Year
 - Day consumption (kWh)
 - Night consumption (kWh)
 - Total amount
@@ -310,7 +312,7 @@ infra/
         ├── node               # Legacy Node.js + PM2 setup (historical)
         ├── nginx              # Reverse proxy, TLS, active slot routing
         ├── prometheus         # Prometheus install + persistent TSDB disk mount
-        ├── grafana            # Grafana install + datasource/dashboard provisioning
+        ├── grafana            # Grafana install + datasource/dashboard/alerts provisioning
         └── node_exporter      # Host-level metrics exporter
 ```
 
@@ -397,6 +399,8 @@ The app exposes Prometheus metrics at `/metrics` (`app/metrics/route.ts`, `lib/o
     - `powertrack-app.json` — application health and request metrics
     - `powertrack-business.json` — bill/address activity and user counts
     - `powertrack-infra.json` — VM and host resource usage
+- Predefined alerts in `infra/ansible/roles/grafana/files/alerting/`:
+    - `powertrack-alerting.json` — alerting rules
 
 Access Grafana locally via SSH tunnel:
 
@@ -425,6 +429,11 @@ Host metrics are collected by `prometheus-node-exporter`, listening on `127.0.0.
 ![Grafana business dashboard](screenshots/infra/grafana-business-dashboard.jpg)
 
 ![Grafana infrastructure dashboard](screenshots/infra/grafana-infra-dashboard.jpg)
+
+#### Grafana Alerts
+
+![Grafana alert](screenshots/infra/grafana-alerts-1.jpg)
+![Grafana alert](screenshots/infra/grafana-alerts-2.jpg)
 
 ## Status
 

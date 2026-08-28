@@ -124,6 +124,362 @@
                     "for": "2m",
                     "isPaused": false,
                     "notification_settings": { "receiver": "Discord" }
+                },
+                {
+                    "uid": "dfwjwuxg980zke",
+                    "title": "RAM busy",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "100 * (\r\n  1 -\r\n  (\r\n    node_memory_MemAvailable_bytes{job=\"node_exporter\"}\r\n    /\r\n    node_memory_MemTotal_bytes{job=\"node_exporter\"}\r\n  )\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [85],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "5m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
+                },
+                {
+                    "uid": "ffwjx0p1oxk3kb",
+                    "title": "RAM critically busy",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "100 * (\r\n  1 -\r\n  (\r\n    node_memory_MemAvailable_bytes{job=\"node_exporter\"}\r\n    /\r\n    node_memory_MemTotal_bytes{job=\"node_exporter\"}\r\n  )\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [95],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "2m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
+                },
+                {
+                    "uid": "ffwjy4sdkaku8c",
+                    "title": "The error rate is high",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "100 *\r\n(\r\n  sum(rate(powertrack_errors_total[5m])) or vector(0)\r\n)\r\n/\r\nclamp_min(\r\n  sum(rate(powertrack_requests_total[5m])),\r\n  0.001\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [5],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "2m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
+                },
+                {
+                    "uid": "cfwk03pdbaps0e",
+                    "title": "Response time is high",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "histogram_quantile(\r\n  0.95,\r\n  sum by (le) (\r\n    rate(powertrack_request_duration_seconds_bucket[5m])\r\n  )\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "B",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "datasource": {
+                                    "type": "prometheus",
+                                    "uid": "prometheus"
+                                },
+                                "editorMode": "code",
+                                "expr": "sum(rate(powertrack_requests_total[5m]))",
+                                "hide": false,
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "B"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [1],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        },
+                        {
+                            "refId": "D",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [0, 0],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": [] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "avg"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "name": "Expression",
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "B",
+                                "hide": false,
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "D",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "5m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
+                }
+            ]
+        },
+        {
+            "orgId": 1,
+            "name": "5-m",
+            "folder": "PowerTrack",
+            "interval": "5m",
+            "rules": [
+                {
+                    "uid": "efwjxd7nq0kxsb",
+                    "title": "Disk is full",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "100 * (\r\n  1 -\r\n  (\r\n    node_filesystem_avail_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n    /\r\n    node_filesystem_size_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n  )\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [85],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "10m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
                 }
             ]
         }
