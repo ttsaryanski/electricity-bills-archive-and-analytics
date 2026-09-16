@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { register, registeredUsersGauge } from "@/lib/observability/metrics";
-
-import { getUsersCount } from "@/repositories/user.repository";
+import { register } from "@/lib/observability/metrics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-    const usersCount = await getUsersCount();
-    registeredUsersGauge.set(usersCount);
-
     const body = await register.metrics();
 
     return new NextResponse(body, {
