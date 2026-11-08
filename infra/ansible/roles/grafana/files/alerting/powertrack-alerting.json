@@ -424,7 +424,7 @@
             "rules": [
                 {
                     "uid": "efwjxd7nq0kxsb",
-                    "title": "Disk is full",
+                    "title": "Persistent disk is full",
                     "condition": "C",
                     "data": [
                         {
@@ -434,6 +434,65 @@
                             "model": {
                                 "editorMode": "code",
                                 "expr": "100 * (\r\n  1 -\r\n  (\r\n    node_filesystem_avail_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n    /\r\n    node_filesystem_size_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n  )\r\n)",
+                                "instant": true,
+                                "intervalMs": 1000,
+                                "legendFormat": "__auto",
+                                "maxDataPoints": 43200,
+                                "range": false,
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "queryType": "expression",
+                            "relativeTimeRange": { "from": 0, "to": 0 },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [85],
+                                            "type": "gt"
+                                        },
+                                        "operator": { "type": "and" },
+                                        "query": { "params": ["C"] },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "10m",
+                    "isPaused": false,
+                    "notification_settings": { "receiver": "Discord" }
+                },
+                {
+                    "uid": "efwjxd7nq0kxsc",
+                    "title": "System disk is full",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": { "from": 600, "to": 0 },
+                            "datasourceUid": "prometheus",
+                            "model": {
+                                "editorMode": "code",
+                                "expr": "100 * (\r\n  1 -\r\n  node_filesystem_avail_bytes{\r\n    mountpoint=\"/\",\r\n    fstype!=\"tmpfs\"\r\n  }\r\n  /\r\n  node_filesystem_size_bytes{\r\n    mountpoint=\"/\",\r\n    fstype!=\"tmpfs\"\r\n  }\r\n)",
                                 "instant": true,
                                 "intervalMs": 1000,
                                 "legendFormat": "__auto",

@@ -423,13 +423,13 @@
                         "uid": "prometheus"
                     },
                     "editorMode": "code",
-                    "expr": "100 * (\r\n  1 -\r\n  (\r\n    node_filesystem_avail_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n    /\r\n    node_filesystem_size_bytes{\r\n      job=\"node_exporter\",\r\n      mountpoint=\"/var/lib/prometheus\",\r\n      fstype!~\"tmpfs|overlay\"\r\n    }\r\n  )\r\n)",
+                    "expr": "100 * (\r\n  1 -\r\n  node_filesystem_avail_bytes{\r\n    mountpoint=\"/\",\r\n    fstype!=\"tmpfs\"\r\n  }\r\n  /\r\n  node_filesystem_size_bytes{\r\n    mountpoint=\"/\",\r\n    fstype!=\"tmpfs\"\r\n  }\r\n)",
                     "legendFormat": "__auto",
                     "range": true,
                     "refId": "A"
                 }
             ],
-            "title": "Persistent disk usage in percent",
+            "title": "System disk usage in percent",
             "type": "timeseries"
         },
         {
