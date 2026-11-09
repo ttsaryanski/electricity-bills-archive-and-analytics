@@ -144,3 +144,11 @@
         - name: Fail deployment after rollback
           fail:
             msg: "Blue/green switch failed. Rolled traffic back to {{ current_color }} slot."
+      
+    - name: Clean up unused Docker images
+      command: docker image prune -a -f
+      register: docker_prune_result
+      changed_when: false
+      failed_when: false
+      tags:
+        - cleanup
